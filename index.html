@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趙奕如 | Personal Profile</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T1RFKVEFGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-T1RFKVEFGE');
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                    },
+                    colors: {
+                        paper: '#F7F5F0', // Beige magazine paper color
+                        ink: '#111111',   // Deep black ink
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Editorial specific styles */
+        body {
+            background-color: #F7F5F0;
+            color: #111111;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .magazine-border-top {
+            border-top: 4px solid #111111;
+        }
+        
+        .magazine-border-bottom {
+            border-bottom: 1px solid #111111;
+        }
+
+        .drop-cap::first-letter {
+            float: left;
+            font-size: 4.5rem;
+            line-height: 0.8;
+            padding-top: 0.3rem;
+            padding-right: 0.5rem;
+            font-family: 'Noto Serif TC', serif;
+            font-weight: 700;
+            color: #111111;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <header class="w-full max-w-6xl mx-auto px-6 pt-8 pb-4">
+        <div class="magazine-border-top pt-4 pb-6 flex flex-col items-center">
+            <h1 class="font-serif text-3xl md:text-5xl font-bold tracking-widest uppercase mb-6">Profile</h1>
+            <nav class="w-full magazine-border-bottom pb-4">
+                <ul class="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm md:text-base font-medium tracking-wider">
+                    <li><a href="#" class="hover:text-gray-500 transition-colors">Home</a></li>
+                    <li><span class="text-gray-400 cursor-not-allowed">News <span class="text-xs font-normal">(Coming soon)</span></span></li>
+                    <li><span class="text-gray-400 cursor-not-allowed">Tools <span class="text-xs font-normal">(Coming soon)</span></span></li>
+                    <li><span class="text-gray-400 cursor-not-allowed">Games <span class="text-xs font-normal">(Coming soon)</span></span></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full max-w-6xl mx-auto px-6 flex flex-col gap-16 md:gap-24 pb-20">
+        
+        <section class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center mt-4">
+            <div class="md:col-span-7 flex flex-col justify-center order-2 md:order-1">
+                <p class="font-serif text-sm md:text-base uppercase tracking-[0.3em] mb-4 text-gray-600">Issue No.1 — Portfolio</p>
+                <h2 class="font-serif text-5xl md:text-7xl font-bold mb-6 leading-tight">趙奕如</h2>
+                <div class="w-16 h-[2px] bg-ink mb-6"></div>
+                <p class="font-serif text-xl md:text-2xl leading-relaxed text-gray-800">
+                    大同大學-數位媒體設計學系<br>預計於 2027/7 畢業
+                </p>
+            </div>
+            <div class="md:col-span-5 order-1 md:order-2">
+                <div class="relative w-full aspect-[3/4] overflow-hidden p-2 border border-ink/20 bg-white">
+                    <img src="個人照片.jpg" alt="趙奕如的個人照片" class="w-full h-full object-cover filter grayscale-[20%] contrast-125">
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-12 gap-8 magazine-border-top pt-12">
+            <div class="md:col-span-4">
+                <h3 class="font-serif text-3xl font-bold uppercase tracking-wider">Biography</h3>
+                <p class="text-sm text-gray-500 mt-2 font-serif italic">About the Designer</p>
+            </div>
+            <div class="md:col-span-8 md:columns-2 gap-8">
+                <p class="drop-cap text-lg leading-loose text-justify">
+                    在學校中，做了很多互動設計相關的作品，有平面設計類、APP、虛實整合的互動繪本等等。具備良好的團隊協作的能力，擅長傾聽。目前關注新一代設計展，興趣是看小說與漫畫。
+                </p>
+            </div>
+        </section>
+
+        <section class="magazine-border-top pt-12 pb-8">
+            <div class="text-center mb-10">
+                <h3 class="font-serif text-2xl font-bold uppercase tracking-widest">Expertise & Tools</h3>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24">
+                <div class="group relative">
+                    <span class="font-serif text-6xl md:text-8xl font-black text-transparent text-stroke transition-all duration-300 hover:text-ink cursor-default" style="-webkit-text-stroke: 1px #111;">Unity</span>
+                </div>
+                <div class="hidden md:block w-px h-24 bg-ink/30"></div>
+                <div class="block md:hidden w-24 h-px bg-ink/30"></div>
+                <div class="group relative">
+                    <span class="font-serif text-6xl md:text-8xl font-black text-transparent text-stroke transition-all duration-300 hover:text-ink cursor-default" style="-webkit-text-stroke: 1px #111;">Canva</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="flex flex-col items-center justify-center py-16 magazine-border-top border-b">
+            <a href="mailto:yiruzhao00@gmail.com" class="inline-block border border-ink px-12 py-5 font-serif text-lg tracking-widest uppercase hover:bg-ink hover:text-paper transition-colors duration-300">
+                聯絡我
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="w-full bg-ink text-paper py-12 px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-center md:text-left">
+            <div>
+                <h4 class="font-serif text-2xl font-bold mb-4 tracking-widest">CONTACT</h4>
+                <p class="font-sans font-light tracking-wide opacity-80 mb-2">信箱 : yiruzhao00@gmail.com</p>
+                <p class="font-sans font-light tracking-wide opacity-80">電話 : 0935656634</p>
+            </div>
+            <div class="font-serif text-sm opacity-60 tracking-widest uppercase">
+                &copy; 2026 趙奕如. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
