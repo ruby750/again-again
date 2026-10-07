@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -367,6 +366,135 @@ canvas {
         display: none;
     }
 }
+
+/* =========================
+   雲端排行榜
+========================= */
+
+.game-over {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.nickname-area {
+    width: min(88%, 320px);
+    margin: 0 auto 12px;
+}
+
+.nickname-input {
+    width: 100%;
+    border: 3px solid #f4bfd0;
+    background: rgba(255,255,255,0.96);
+    color: #805566;
+    border-radius: 999px;
+    padding: 11px 16px;
+    font-size: 15px;
+    text-align: center;
+    outline: none;
+}
+
+.nickname-input:focus {
+    border-color: #e783a2;
+    box-shadow: 0 0 0 4px rgba(231,131,162,0.12);
+}
+
+.submit-score-button {
+    margin-top: 10px;
+}
+
+.score-submit-status {
+    min-height: 20px;
+    margin: 8px 0 10px;
+    font-size: 13px;
+    color: #9d7180;
+}
+
+.leaderboard {
+    width: min(90vw, 560px);
+    margin: 24px auto 0;
+    padding: 20px;
+    background: rgba(255,255,255,0.88);
+    border: 3px solid #f4bfd0;
+    border-radius: 24px;
+    box-shadow: 0 8px 22px rgba(170,90,120,0.12);
+}
+
+.leaderboard-title {
+    font-size: 22px;
+    color: #df7899;
+    margin-bottom: 12px;
+}
+
+.leaderboard-status {
+    padding: 12px 0;
+    font-size: 14px;
+    color: #a77888;
+}
+
+.leaderboard-list {
+    list-style: none;
+    width: 100%;
+}
+
+.leaderboard-item {
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px dashed #f2c8d6;
+    font-size: 14px;
+}
+
+.leaderboard-item:last-child {
+    border-bottom: none;
+}
+
+.leaderboard-rank {
+    font-weight: bold;
+    color: #dc7898;
+}
+
+.leaderboard-name {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.leaderboard-score {
+    font-weight: bold;
+    color: #e67f9f;
+}
+
+@media (max-width: 700px) {
+    .game-over {
+        justify-content: flex-start;
+        padding-top: 34px;
+    }
+
+    .game-over .overlay-icon {
+        font-size: 42px;
+    }
+
+    .game-over .overlay-title {
+        font-size: 24px;
+    }
+
+    .game-over .overlay-text {
+        margin: 6px 0 12px;
+    }
+
+    .nickname-input {
+        font-size: 16px;
+    }
+
+    .leaderboard {
+        margin-top: 18px;
+        padding: 16px 12px;
+    }
+}
+
 </style>
 </head>
 
@@ -463,8 +591,6 @@ canvas {
             </button>
 
         </div>
-
-
         <!-- 遊戲結束 -->
         <div
             class="game-over"
@@ -480,17 +606,39 @@ canvas {
             </div>
 
             <div class="overlay-text">
-
                 你的分數：
-                <span id="finalScore">
-                    0
-                </span>
-
+                <span id="finalScore">0</span>
             </div>
+
+            <div class="nickname-area">
+                <input
+                    class="nickname-input"
+                    id="nicknameInput"
+                    type="text"
+                    maxlength="20"
+                    placeholder="輸入你的暱稱"
+                    autocomplete="nickname"
+                >
+
+                <button
+                    class="restart-button submit-score-button"
+                    id="submitScoreButton"
+                    type="button"
+                >
+                    儲存分數
+                </button>
+            </div>
+
+            <div
+                class="score-submit-status"
+                id="scoreSubmitStatus"
+                aria-live="polite"
+            ></div>
 
             <button
                 class="restart-button"
                 id="restartButton"
+                type="button"
             >
                 重新開始
             </button>
@@ -503,6 +651,31 @@ canvas {
     <p class="game-tip">
         ↑ ↓ ← → 控制方向　｜　空白鍵 暫停
     </p>
+
+
+    <!-- 雲端排行榜 -->
+    <section class="leaderboard" aria-labelledby="leaderboardTitle">
+
+        <h2
+            class="leaderboard-title"
+            id="leaderboardTitle"
+        >
+            🏆 雲端排行榜 TOP 10
+        </h2>
+
+        <div
+            class="leaderboard-status"
+            id="leaderboardStatus"
+        >
+            排行榜讀取中…
+        </div>
+
+        <ol
+            class="leaderboard-list"
+            id="leaderboardList"
+        ></ol>
+
+    </section>
 
 
     <!-- 手機控制 -->
@@ -578,6 +751,11 @@ const ctx =
     canvas.getContext("2d");
 
 
+// Google Apps Script 雲端排行榜網址
+const LEADERBOARD_API =
+    "https://script.google.com/macros/s/AKfycbwnwHmGxduXY-KdiydvO6I4Z0HVOlVCNixVsNqHeoyBvC8gNW8EtFFWLz4vUrjhC6I/exec";
+
+
 const gridSize = 20;
 
 const tileSize =
@@ -624,6 +802,21 @@ const leftButton =
 const rightButton =
     document.getElementById("rightButton");
 
+const nicknameInput =
+    document.getElementById("nicknameInput");
+
+const submitScoreButton =
+    document.getElementById("submitScoreButton");
+
+const scoreSubmitStatus =
+    document.getElementById("scoreSubmitStatus");
+
+const leaderboardList =
+    document.getElementById("leaderboardList");
+
+const leaderboardStatus =
+    document.getElementById("leaderboardStatus");
+
 
 /* =========================
    遊戲變數
@@ -651,6 +844,8 @@ let gameRunning = false;
 let paused = false;
 
 let gameLoop;
+
+let scoreSubmitted = false;
 
 
 /* =========================
@@ -685,6 +880,18 @@ function startGame() {
 
 
     score = 0;
+
+    scoreSubmitted = false;
+
+    scoreSubmitStatus.textContent = "";
+
+    submitScoreButton.disabled = false;
+
+    submitScoreButton.textContent = "儲存分數";
+
+    nicknameInput.value = "";
+
+    nicknameInput.disabled = false;
 
 
     scoreText.textContent = score;
@@ -1128,6 +1335,238 @@ function endGame() {
         "show"
     );
 }
+
+
+
+/* =========================
+   雲端排行榜
+========================= */
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+
+async function loadLeaderboard() {
+
+    leaderboardStatus.style.display = "block";
+    leaderboardStatus.textContent = "排行榜讀取中…";
+    leaderboardList.innerHTML = "";
+
+    try {
+
+        const response =
+            await fetch(
+                LEADERBOARD_API +
+                "?action=getRanking&t=" +
+                Date.now()
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "HTTP " + response.status
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+            throw new Error(
+                data.message ||
+                "讀取排行榜失敗"
+            );
+        }
+
+        const ranking =
+            Array.isArray(data.ranking)
+                ? data.ranking
+                : [];
+
+        if (ranking.length === 0) {
+
+            leaderboardStatus.textContent =
+                "目前還沒有排行榜紀錄，成為第一位玩家吧！";
+
+            return;
+        }
+
+        leaderboardStatus.style.display =
+            "none";
+
+        ranking
+            .slice(0, 10)
+            .forEach(function(player, index) {
+
+                const item =
+                    document.createElement("li");
+
+                item.className =
+                    "leaderboard-item";
+
+                let medal =
+                    String(index + 1);
+
+                if (index === 0) {
+                    medal = "🥇";
+                } else if (index === 1) {
+                    medal = "🥈";
+                } else if (index === 2) {
+                    medal = "🥉";
+                }
+
+                item.innerHTML =
+                    '<span class="leaderboard-rank">' +
+                    medal +
+                    '</span>' +
+                    '<span class="leaderboard-name">' +
+                    escapeHtml(player.name) +
+                    '</span>' +
+                    '<span class="leaderboard-score">' +
+                    Number(player.score) +
+                    " 分</span>";
+
+                leaderboardList.appendChild(
+                    item
+                );
+            });
+
+    } catch (error) {
+
+        console.error(
+            "排行榜讀取失敗：",
+            error
+        );
+
+        leaderboardStatus.style.display =
+            "block";
+
+        leaderboardStatus.textContent =
+            "排行榜暫時無法讀取，請稍後再試。";
+    }
+}
+
+
+async function submitScore() {
+
+    if (scoreSubmitted) {
+        return;
+    }
+
+    const name =
+        nicknameInput.value.trim();
+
+    if (!name) {
+
+        scoreSubmitStatus.textContent =
+            "請先輸入暱稱。";
+
+        nicknameInput.focus();
+
+        return;
+    }
+
+    if (name.length > 20) {
+
+        scoreSubmitStatus.textContent =
+            "暱稱不能超過 20 個字。";
+
+        nicknameInput.focus();
+
+        return;
+    }
+
+    submitScoreButton.disabled = true;
+    submitScoreButton.textContent =
+        "儲存中…";
+
+    scoreSubmitStatus.textContent =
+        "正在上傳分數…";
+
+    try {
+
+        const response =
+            await fetch(
+                LEADERBOARD_API,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        name: name,
+                        score: score
+                    })
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error(
+                "HTTP " + response.status
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (!data.success) {
+            throw new Error(
+                data.message ||
+                "儲存失敗"
+            );
+        }
+
+        scoreSubmitted = true;
+
+        scoreSubmitStatus.textContent =
+            "✅ 分數已成功存到雲端排行榜！";
+
+        submitScoreButton.textContent =
+            "已儲存";
+
+        nicknameInput.disabled = true;
+
+        await loadLeaderboard();
+
+    } catch (error) {
+
+        console.error(
+            "分數上傳失敗：",
+            error
+        );
+
+        scoreSubmitStatus.textContent =
+            "❌ 儲存失敗，請確認 Apps Script 已正確部署後再試。";
+
+        submitScoreButton.disabled = false;
+
+        submitScoreButton.textContent =
+            "重新儲存";
+    }
+}
+
+
+submitScoreButton.addEventListener(
+    "click",
+    submitScore
+);
+
+
+nicknameInput.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            submitScore();
+        }
+    }
+);
 
 
 /* =========================
@@ -1760,8 +2199,9 @@ canvas.addEventListener(
 
 startGame();
 
+loadLeaderboard();
+
 </script>
 
 </body>
 </html>
-```
