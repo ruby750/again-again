@@ -91,6 +91,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             color: #111111;
         }
 
+        .project-card { border-top: 1px solid #111; padding-top: 20px; transition: transform .25s ease; }
+        .project-card:hover { transform: translateY(-4px); }
+        .project-number { font-family: 'Noto Serif TC',serif; font-size: 13px; letter-spacing: .17em; color: #737373; }
+        .project-card h4 { font-family: 'Noto Serif TC',serif; font-size: 1.45rem; font-weight: 700; margin: 12px 0; }
+        .project-card p { line-height: 1.9; color: #505050; }
+        .project-tag { display: inline-block; border: 1px solid #aaa; padding: 4px 10px; font-size: 12px; margin-top: 18px; }
         @media (max-width: 768px) {
             .profile-photo {
                 border-radius: 16px;
@@ -118,27 +124,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <nav class="w-full magazine-border-bottom pb-4">
                 <ul class="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm md:text-base font-medium tracking-wider">
                     <li>
-                        <a href="#" class="hover:text-gray-500 transition-colors">
+                        <a href="#home" class="hover:text-gray-500 transition-colors">
                             Home
                         </a>
                     </li>
 
                     <li>
-                        <span class="text-gray-400 cursor-not-allowed">
-                            News <span class="text-xs font-normal">(Coming soon)</span>
-                        </span>
+                        <a href="#projects" class="hover:text-gray-500 transition-colors">Projects</a>
                     </li>
 
                     <li>
-                        <span class="text-gray-400 cursor-not-allowed">
-                            Tools <span class="text-xs font-normal">(Coming soon)</span>
-                        </span>
+                        <a href="#tools" class="hover:text-gray-500 transition-colors">Tools</a>
                     </li>
 
                     <li>
-                        <span class="text-gray-400 cursor-not-allowed">
-                            Games <span class="text-xs font-normal">(Coming soon)</span>
-                        </span>
+                        <a href="#games" class="hover:text-gray-500 transition-colors">Games</a>
                     </li>
                 </ul>
             </nav>
@@ -149,7 +149,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <main class="flex-grow w-full max-w-6xl mx-auto px-6 flex flex-col gap-16 md:gap-24 pb-20">
         
         <!-- 個人介紹 -->
-        <section class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center mt-4">
+        <section id="home" class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center mt-4">
 
             <div class="md:col-span-7 flex flex-col justify-center order-2 md:order-1">
                 
@@ -174,7 +174,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div class="md:col-span-5 order-1 md:order-2">
                 <div class="relative w-full aspect-[3/4] overflow-hidden p-2 border border-ink/20 bg-white rounded-[20px]">
                     <img 
-                        src="me.png" 
+                        src="images/me.png" 
                         alt="趙奕如"
                         class="profile-photo filter grayscale-[20%] contrast-125"
                     >
@@ -208,8 +208,46 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </section>
 
 
+        <!-- 作品專案：以已提及的製作與企劃為例，未提供作品連結的項目不虛構連結 -->
+        <section id="projects" class="magazine-border-top pt-12">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-10">
+                <div>
+                    <p class="font-serif text-sm text-gray-500 tracking-widest mb-3">SELECTED WORK / 2026</p>
+                    <h3 class="font-serif text-3xl md:text-4xl font-bold">Projects <span class="font-normal text-xl">作品與企劃</span></h3>
+                </div>
+                <p class="text-sm text-gray-600">互動設計 · 遊戲 · 學習體驗</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+                <article class="project-card">
+                    <span class="project-number">01 / WEB GAME</span>
+                    <h4>可愛貪食蛇｜網頁小遊戲</h4>
+                    <p>使用 HTML、CSS 與 JavaScript 製作可在電腦、手機操作的貪食蛇遊戲，加入分數紀錄與 Google 試算表雲端排行榜。</p>
+                    <span class="project-tag">網頁互動・可遊玩</span>
+                    <p class="mt-4"><a class="underline underline-offset-4 hover:text-gray-500" href="game.html">進入遊戲 ↗</a></p>
+                </article>
+                <article class="project-card">
+                    <span class="project-number">02 / UNITY</span>
+                    <h4>人際關係探索互動遊戲</h4>
+                    <p>以太空人探索地圖、認識不同角色為核心，透過角色動作、表情與互動選擇呈現人際關係，不依賴文字對話與聲音。</p>
+                    <span class="project-tag">Unity・製作中</span>
+                </article>
+                <article class="project-card">
+                    <span class="project-number">03 / EDUCATIONAL GAME</span>
+                    <h4>輔助識字互動遊戲</h4>
+                    <p>針對啟聰學校學童的學習需求，規劃以清楚的視覺提示及遊戲化關卡，協助練習字形辨識與語意理解。</p>
+                    <span class="project-tag">互動教學・企劃</span>
+                </article>
+                <article class="project-card">
+                    <span class="project-number">04 / VR CONCEPT</span>
+                    <h4>VR 瓷器修復體驗</h4>
+                    <p>規劃運用 VR 沉浸式互動，讓體驗者以模擬方式理解瓷器修復的流程與操作步驟。</p>
+                    <span class="project-tag">VR・概念提案</span>
+                </article>
+            </div>
+        </section>
+
         <!-- Expertise & Tools -->
-        <section class="magazine-border-top pt-12 pb-8">
+        <section id="tools" class="magazine-border-top pt-12 pb-8">
 
             <div class="text-center mb-10">
                 <h3 class="font-serif text-2xl font-bold uppercase tracking-widest">
@@ -247,7 +285,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
         <!-- 小遊戲 -->
-        <section class="flex flex-col items-center justify-center py-12 magazine-border-top">
+        <section id="games" class="flex flex-col items-center justify-center py-12 magazine-border-top">
 
             <div class="text-center mb-6">
                 <p class="font-serif text-sm text-gray-500 tracking-widest mb-3">
