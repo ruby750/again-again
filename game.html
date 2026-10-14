@@ -179,7 +179,8 @@ canvas {
 ========================= */
 
 .game-over,
-.pause-screen {
+.pause-screen,
+.ready-screen {
     position: absolute;
 
     inset: 0;
@@ -198,7 +199,8 @@ canvas {
 }
 
 .game-over.show,
-.pause-screen.show {
+.pause-screen.show,
+.ready-screen.show {
     display: flex;
 }
 
@@ -366,6 +368,12 @@ canvas {
         display: none;
     }
 }
+
+/* =========================
+   準備畫面
+========================= */
+.ready-screen { padding: 24px; z-index: 5; text-align: center; }
+.ready-screen .overlay-text { max-width: 300px; line-height: 1.8; }
 
 /* =========================
    雲端排行榜
@@ -565,6 +573,14 @@ canvas {
         ></canvas>
 
 
+        <!-- 開始前準備畫面 -->
+        <div class="ready-screen show" id="readyScreen">
+            <div class="overlay-icon">🐍</div>
+            <div class="overlay-title">準備好了嗎？</div>
+            <div class="overlay-text">吃掉愛心、避開牆壁和自己的身體！<br>電腦使用方向鍵；手機使用下方方向按鈕。</div>
+            <button class="restart-button" id="startButton" type="button">開始遊戲 ♡</button>
+        </div>
+
         <!-- 暫停畫面 -->
         <div
             class="pause-screen"
@@ -653,32 +669,7 @@ canvas {
     </p>
 
 
-    <!-- 雲端排行榜 -->
-    <section class="leaderboard" aria-labelledby="leaderboardTitle">
-
-        <h2
-            class="leaderboard-title"
-            id="leaderboardTitle"
-        >
-            🏆 雲端排行榜 TOP 10
-        </h2>
-
-        <div
-            class="leaderboard-status"
-            id="leaderboardStatus"
-        >
-            排行榜讀取中…
-        </div>
-
-        <ol
-            class="leaderboard-list"
-            id="leaderboardList"
-        ></ol>
-
-    </section>
-
-
-    <!-- 手機控制 -->
+<!-- 手機控制 -->
     <div class="mobile-controls">
 
         <!-- 上 -->
@@ -735,7 +726,32 @@ canvas {
 
     </div>
 
-</main>
+    <!-- 雲端排行榜 -->
+    <section class="leaderboard" aria-labelledby="leaderboardTitle">
+
+        <h2
+            class="leaderboard-title"
+            id="leaderboardTitle"
+        >
+            🏆 雲端排行榜 TOP 10
+        </h2>
+
+        <div
+            class="leaderboard-status"
+            id="leaderboardStatus"
+        >
+            排行榜讀取中…
+        </div>
+
+        <ol
+            class="leaderboard-list"
+            id="leaderboardList"
+        ></ol>
+
+    </section>
+
+
+    </main>
 
 
 <script>
@@ -780,6 +796,9 @@ const gameOverScreen =
 
 const pauseScreen =
     document.getElementById("pauseScreen");
+
+const readyScreen = document.getElementById("readyScreen");
+const startButton = document.getElementById("startButton");
 
 const restartButton =
     document.getElementById("restartButton");
@@ -853,6 +872,7 @@ let scoreSubmitted = false;
 ========================= */
 
 function startGame() {
+    readyScreen.classList.remove("show");
 
     snake = [
 
@@ -1207,6 +1227,7 @@ function changeDirection(newDirection) {
 document.addEventListener(
     "keydown",
     function(event) {
+        if (event.target === nicknameInput) return;
 
         /*
            上
@@ -1603,51 +1624,20 @@ function draw() {
 ========================= */
 
 function drawBackground() {
-
-    for (
-        let y = 0;
-        y < gridSize;
-        y++
-    ) {
-
-        for (
-            let x = 0;
-            x < gridSize;
-            x++
-        ) {
-
-            if (
-                (x + y) % 2 === 0
-            ) {
-
-                ctx.fillStyle =
-                    "rgba(255,210,225,0.25)";
-
-
-                ctx.beginPath();
-
-
-                ctx.arc(
-
-                    x * tileSize +
-                        tileSize / 2,
-
-                    y * tileSize +
-                        tileSize / 2,
-
-                    2,
-
-                    0,
-
-                    Math.PI * 2
-
-                );
-
-
-                ctx.fill();
-            }
-        }
+    // 20 × 20 格：清楚的粉色分格，幫助判斷下一步落點
+    ctx.save();
+    ctx.strokeStyle = "rgba(220, 120, 152, 0.25)";
+    ctx.lineWidth = 1;
+    for (let i = 1; i < gridSize; i++) {
+        const pos = i * tileSize;
+        ctx.beginPath();
+        ctx.moveTo(pos, 0);
+        ctx.lineTo(pos, canvas.height);
+        ctx.moveTo(0, pos);
+        ctx.lineTo(canvas.width, pos);
+        ctx.stroke();
     }
+    ctx.restore();
 }
 
 
@@ -2197,7 +2187,12 @@ canvas.addEventListener(
    開始遊戲
 ========================= */
 
-startGame();
+// 首次載入先顯示預覽棋盤，按「開始遊戲」才啟動移動計時器。
+snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+createFood();
+draw();
+highScoreText.textContent = highScore;
+startButton.addEventListener("click", startGame);
 
 loadLeaderboard();
 
