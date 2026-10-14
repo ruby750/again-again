@@ -848,6 +848,7 @@ let food = {};
 let direction = "right";
 
 let nextDirection = "right";
+let turnQueuedThisTick = false;
 
 let score = 0;
 
@@ -897,6 +898,7 @@ function startGame() {
     direction = "right";
 
     nextDirection = "right";
+    turnQueuedThisTick = false;
 
 
     score = 0;
@@ -1011,6 +1013,7 @@ function updateGame() {
 
     direction =
         nextDirection;
+    turnQueuedThisTick = false;
 
 
     /*
@@ -1156,67 +1159,17 @@ function updateGame() {
 ========================= */
 
 function changeDirection(newDirection) {
+    if (!gameRunning || paused) return;
 
-    if (
-        !gameRunning ||
-        paused
-    ) {
-        return;
-    }
+    // 參照舊版：每格只改變一次方向，避免一格內的後續按鍵覆蓋前一個轉彎。
+    if (turnQueuedThisTick) return;
+    const opposite = {
+        up: "down", down: "up", left: "right", right: "left"
+    };
+    if (newDirection === direction || newDirection === opposite[direction]) return;
 
-
-    /*
-       防止蛇直接 180 度掉頭
-
-       例如：
-       向右 → 不能直接向左
-       向左 → 不能直接向右
-       向上 → 不能直接向下
-       向下 → 不能直接向上
-    */
-
-    if (
-
-        direction === "up" &&
-        newDirection === "down"
-
-    ) {
-        return;
-    }
-
-
-    if (
-
-        direction === "down" &&
-        newDirection === "up"
-
-    ) {
-        return;
-    }
-
-
-    if (
-
-        direction === "left" &&
-        newDirection === "right"
-
-    ) {
-        return;
-    }
-
-
-    if (
-
-        direction === "right" &&
-        newDirection === "left"
-
-    ) {
-        return;
-    }
-
-
-    nextDirection =
-        newDirection;
+    nextDirection = newDirection;
+    turnQueuedThisTick = true;
 }
 
 
@@ -2087,44 +2040,28 @@ function roundRect(
    手機按鈕
 ========================= */
 
-upButton.addEventListener(
-    "click",
-    function() {
-
-        changeDirection("up");
-
-    }
-);
+upButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    changeDirection("up");
+});
 
 
-downButton.addEventListener(
-    "click",
-    function() {
-
-        changeDirection("down");
-
-    }
-);
+downButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    changeDirection("down");
+});
 
 
-leftButton.addEventListener(
-    "click",
-    function() {
-
-        changeDirection("left");
-
-    }
-);
+leftButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    changeDirection("left");
+});
 
 
-rightButton.addEventListener(
-    "click",
-    function() {
-
-        changeDirection("right");
-
-    }
-);
+rightButton.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    changeDirection("right");
+});
 
 
 /* =========================
