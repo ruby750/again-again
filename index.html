@@ -3,8 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>趙奕如 | Personal Profile</title>
-    
+    <title>趙奕如｜互動設計作品集</title>
+    <meta name="description" content="趙奕如｜大同大學數位媒體設計學系，展示互動網頁、Unity互動裝置與設計作品。">
+    <link rel="canonical" href="https://ruby750.github.io/again-again/">
+
+    <!-- Open Graph：LINE、Facebook 等社群分享預覽 -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_TW">
+    <meta property="og:site_name" content="趙奕如｜互動設計作品集">
+    <meta property="og:title" content="趙奕如｜互動設計作品集">
+    <meta property="og:description" content="趙奕如｜大同大學數位媒體設計學系，展示互動網頁、Unity互動裝置與設計作品。">
+    <meta property="og:url" content="https://ruby750.github.io/again-again/">
+    <meta property="og:image" content="https://ruby750.github.io/again-again/og.jpg">
+    <meta property="og:image:secure_url" content="https://ruby750.github.io/again-again/og.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="趙奕如個人作品集 Open Graph 封面">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="趙奕如｜互動設計作品集">
+    <meta name="twitter:description" content="趙奕如｜大同大學數位媒體設計學系，展示互動網頁、Unity互動裝置與設計作品。">
+    <meta name="twitter:image" content="https://ruby750.github.io/again-again/og.jpg">
+
+    <!-- 瀏覽器分頁與手機加入主畫面的圖示 -->
+    <link rel="icon" type="image/png" sizes="1024x1024" href="favicon.png">
+    <link rel="apple-touch-icon" sizes="1024x1024" href="favicon.png">
+    <meta name="apple-mobile-web-app-title" content="趙奕如作品集">
+
     <!-- Google Tag Manager -->
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -12,11 +37,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-PG6DHGT6');</script>
 <!-- End Google Tag Manager -->
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -34,7 +58,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }
         }
     </script>
-
     <style>
         /* Editorial specific styles */
         body {
@@ -43,15 +66,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        
+
         .magazine-border-top {
             border-top: 4px solid #111111;
         }
-        
+
         .magazine-border-bottom {
             border-bottom: 1px solid #111111;
         }
-
         .drop-cap::first-letter {
             float: left;
             font-size: 4.5rem;
@@ -62,7 +84,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             font-weight: 700;
             color: #111111;
         }
-
         /* 個人照片 */
         .profile-photo {
             width: 100%;
@@ -71,7 +92,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             object-position: center;
             border-radius: 18px;
         }
-
         /* 小遊戲按鈕 */
         .game-button {
             display: inline-block;
@@ -85,23 +105,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             text-decoration: none;
             transition: all 0.3s ease;
         }
-
         .game-button:hover {
             background-color: transparent;
             color: #111111;
         }
-
         .project-card { border-top: 1px solid #111; padding-top: 20px; transition: transform .25s ease; }
         .project-card:hover { transform: translateY(-4px); }
         .project-number { font-family: 'Noto Serif TC',serif; font-size: 13px; letter-spacing: .17em; color: #737373; }
         .project-card h4 { font-family: 'Noto Serif TC',serif; font-size: 1.45rem; font-weight: 700; margin: 12px 0; }
         .project-card p { line-height: 1.9; color: #505050; }
         .project-tag { display: inline-block; border: 1px solid #aaa; padding: 4px 10px; font-size: 12px; margin-top: 18px; }
+        /* 分享按鈕：沿用網站的奶油白／黑色雜誌風格 */
+        .share-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 9px 16px;
+            border: 1px solid #111111;
+            background: transparent;
+            color: #111111;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 14px;
+            letter-spacing: .06em;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color .25s ease, color .25s ease;
+        }
+        .share-button:hover, .share-button:focus-visible {
+            background-color: #111111;
+            color: #F7F5F0;
+        }
         @media (max-width: 768px) {
             .profile-photo {
                 border-radius: 16px;
             }
-
             .game-button {
                 width: 100%;
                 max-width: 320px;
@@ -114,13 +152,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 
 <body class="font-sans antialiased min-h-screen flex flex-col">
-
     <header class="w-full max-w-6xl mx-auto px-6 pt-8 pb-4">
         <div class="magazine-border-top pt-4 pb-6 flex flex-col items-center">
             <h1 class="font-serif text-3xl md:text-5xl font-bold tracking-widest uppercase mb-6">
                 Profile
             </h1>
-
             <nav class="w-full magazine-border-bottom pb-4">
                 <ul class="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm md:text-base font-medium tracking-wider">
                     <li>
@@ -128,7 +164,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             Home
                         </a>
                     </li>
-
                     <li>
                         <a href="#projects" class="hover:text-gray-500 transition-colors">Projects</a>
                     </li>
@@ -136,7 +171,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <li>
                         <a href="#tools" class="hover:text-gray-500 transition-colors">Tools</a>
                     </li>
-
                     <li>
                         <a href="#games" class="hover:text-gray-500 transition-colors">Games</a>
                     </li>
@@ -147,12 +181,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
     <main class="flex-grow w-full max-w-6xl mx-auto px-6 flex flex-col gap-16 md:gap-24 pb-20">
-        
+
         <!-- 個人介紹 -->
         <section id="home" class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center mt-4">
-
             <div class="md:col-span-7 flex flex-col justify-center order-2 md:order-1">
-                
+
                 <p class="font-serif text-sm md:text-base uppercase tracking-[0.3em] mb-4 text-gray-600">
                     Issue No.1 — Portfolio
                 </p>
@@ -161,20 +194,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     趙奕如
                 </h2>
 
-                <div class="w-16 h-[2px] bg-ink mb-6"></div>
+                <!-- 新增網站定位，保留原本學校與畢業資訊 -->
+                <p class="font-serif text-base md:text-lg leading-relaxed text-gray-700 mb-6">
+                    趙奕如｜大同大學數位媒體設計學系，展示互動網頁、Unity互動裝置與設計作品。
+                </p>
 
+                <div class="w-16 h-[2px] bg-ink mb-6"></div>
                 <p class="font-serif text-xl md:text-2xl leading-relaxed text-gray-800">
                     大同大學-數位媒體設計學系<br>
                     預計於 2027/7 畢業
                 </p>
 
-            </div>
+                <!-- 新增 LINE、Facebook 與系統分享／複製網址 -->
+                <div class="mt-7">
+                    <p class="font-serif text-xs tracking-[0.2em] text-gray-500 mb-3">SHARE THIS PAGE</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a class="share-button" href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fruby750.github.io%2Fagain-again%2F" target="_blank" rel="noopener noreferrer" aria-label="分享到 LINE">LINE</a>
+                        <a class="share-button" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fruby750.github.io%2Fagain-again%2F" target="_blank" rel="noopener noreferrer" aria-label="分享到 Facebook">Facebook</a>
+                        <button id="native-share-button" class="share-button" type="button">手機分享</button>
+                    </div>
+                    <p id="share-feedback" class="text-sm text-gray-600 mt-3" role="status" aria-live="polite"></p>
+                </div>
 
+            </div>
             <!-- 個人照片 -->
             <div class="md:col-span-5 order-1 md:order-2">
                 <div class="relative w-full aspect-[3/4] overflow-hidden p-2 border border-ink/20 bg-white rounded-[20px]">
-                    <img 
-                        src="images/me.png" 
+                    <img
+                        src="images/me.png"
                         alt="趙奕如"
                         class="profile-photo filter grayscale-[20%] contrast-125"
                     >
@@ -182,7 +229,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
 
         </section>
-
 
         <!-- Biography -->
         <section class="grid grid-cols-1 md:grid-cols-12 gap-8 magazine-border-top pt-12">
@@ -198,7 +244,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
 
             <div class="md:col-span-8 md:columns-2 gap-8">
-
                 <p class="drop-cap text-lg leading-loose text-justify">
                     在學校中，做了很多互動設計相關的作品，有平面設計類、APP、虛實整合的互動繪本等等。具備良好的團隊協作的能力，擅長傾聽。目前關注新一代設計展，興趣是看<strong>小說</strong>與漫畫。
                 </p>
@@ -206,7 +251,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
 
         </section>
-
 
         <!-- 作品專案：以已提及的製作與企劃為例，未提供作品連結的項目不虛構連結 -->
         <section id="projects" class="magazine-border-top pt-12">
@@ -245,7 +289,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </article>
             </div>
         </section>
-
         <!-- Expertise & Tools -->
         <section id="tools" class="magazine-border-top pt-12 pb-8">
 
@@ -256,9 +299,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
 
             <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24">
-
                 <div class="group relative">
-                    <span 
+                    <span
                         class="font-serif text-6xl md:text-8xl font-black text-transparent text-stroke transition-all duration-300 hover:text-ink cursor-default"
                         style="-webkit-text-stroke: 1px #111;"
                     >
@@ -267,11 +309,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
 
                 <div class="hidden md:block w-px h-24 bg-ink/30"></div>
-
                 <div class="block md:hidden w-24 h-px bg-ink/30"></div>
 
                 <div class="group relative">
-                    <span 
+                    <span
                         class="font-serif text-6xl md:text-8xl font-black text-transparent text-stroke transition-all duration-300 hover:text-ink cursor-default"
                         style="-webkit-text-stroke: 1px #111;"
                     >
@@ -280,7 +321,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
 
             </div>
-
         </section>
 
 
@@ -296,9 +336,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     來玩玩看吧！
                 </h3>
             </div>
-
-            <a 
-                href="game.html" 
+            <a
+                href="game.html"
                 class="game-button"
             >
                 玩我的小遊戲
@@ -309,9 +348,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
         <!-- 聯絡我 -->
         <section class="flex flex-col items-center justify-center py-16 magazine-border-top border-b">
-
-            <a 
-                href="mailto:yiruzhao00@gmail.com" 
+            <a
+                href="mailto:yiruzhao00@gmail.com"
                 class="inline-block border border-ink px-12 py-5 font-serif text-lg tracking-widest uppercase hover:bg-ink hover:text-paper transition-colors duration-300"
             >
                 聯絡我
@@ -323,7 +361,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 
     <footer class="w-full bg-ink text-paper py-12 px-6">
-
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center md:items-end gap-6 text-center md:text-left">
 
             <div>
@@ -334,7 +371,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <p class="font-sans font-light tracking-wide opacity-80 mb-2">
                     信箱 : yiruzhao00@gmail.com
                 </p>
-
                 <p class="font-sans font-light tracking-wide opacity-80">
                     電話 : 0935656634
                 </p>
@@ -348,5 +384,60 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     </footer>
 
+    <script>
+        // 手機使用系統分享選單；電腦顯示「複製網址」並複製網站連結。
+        (function () {
+            const url = 'https://ruby750.github.io/again-again/';
+            const title = '趙奕如｜互動設計作品集';
+            const description = '趙奕如｜大同大學數位媒體設計學系，展示互動網頁、Unity互動裝置與設計作品。';
+            const button = document.getElementById('native-share-button');
+            const feedback = document.getElementById('share-feedback');
+            const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+            if (!isMobile || !navigator.share) {
+                button.textContent = '複製網址';
+                button.setAttribute('aria-label', '複製網站網址');
+            } else {
+                button.textContent = '手機分享';
+                button.setAttribute('aria-label', '開啟手機系統分享選單');
+            }
+
+            async function copyUrl() {
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(url);
+                    } else {
+                        const input = document.createElement('textarea');
+                        input.value = url;
+                        input.setAttribute('readonly', '');
+                        input.style.position = 'fixed';
+                        input.style.opacity = '0';
+                        document.body.appendChild(input);
+                        input.select();
+                        const copied = document.execCommand('copy');
+                        document.body.removeChild(input);
+                        if (!copied) throw new Error('copy unavailable');
+                    }
+                    feedback.textContent = '已複製網站網址！';
+                } catch (error) {
+                    feedback.textContent = '無法自動複製，請手動複製：' + url;
+                }
+            }
+
+            button.addEventListener('click', async function () {
+                feedback.textContent = '';
+                if (isMobile && navigator.share) {
+                    try {
+                        await navigator.share({ title, text: description, url });
+                        return;
+                    } catch (error) {
+                        if (error.name === 'AbortError') return;
+                    }
+                }
+                await copyUrl();
+            });
+        })();
+    </script>
 </body>
 </html>
