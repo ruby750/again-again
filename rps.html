@@ -567,130 +567,81 @@
     }
 
     async function joinRoom() {
+      const name = cleanName();
+      if (!name || busy || !db) return;
 
-  const name = cleanName();
-
-  if (!name || busy || !db) return;
-
-  const code = $('roomInput').value.trim();
-
-  if (!/^\d{4}$/.test(code)) {
-
-    notify('請輸入完整的 4 位數房號。', 'error');
-
-    return;
-
-  }
-
-  setBusy(true);
-
-  notify('正在加入房間...');
-
-  try {
-
-    const targetRef = roomRef(code);
-
-    // 先從 Firebase 取得房間資料
-
-    const snapshot = await get(targetRef);
-
-    if (!snapshot.exists()) {
-
-      throw new Error('找不到這個房號。');
-
-    }
-
-    const room = snapshot.val();
-
-    if (!room.players?.p1 || room.players.p1.left) {
-
-      throw new Error('房主已離開，請建立新房間。');
-
-    }
-
-    if (room.players.p2) {
-
-      throw new Error('這個房間已滿（最多兩人）。');
-
-    }
-
-    if (room.players.p1.id === sessionId) {
-
-      throw new Error('你已經是這個房間的房主。');
-
-    }
-
-    // 確認房間存在後，使用交易安全加入
-
-    const result = await runTransaction(targetRef, current => {
-
-      if (!current ||
-
-          !current.players?.p1 ||
-
-          current.players.p1.left ||
-
-          current.players.p2 ||
-
-          current.players.p1.id === sessionId) {
-
+      const code = $('roomInput').value.trim();
+      if (!/^\d{4}$/.test(code)) {
+        notify('請輸入完整的 4 位數房號。', 'error');
         return;
-
       }
 
-      return {
+      setBusy(true);
+      notify('正在加入房間...');
 
-        ...current,
+      try {
+        const targetRef = roomRef(code);
 
-        players: {
+        // 先檢查房間是否存在；get() 不能保證後續父節點 transaction
+        // 首次執行時就有本機快取，因此不對整個房間做加入交易。
+        const snapshot = await get(targetRef);
+        if (!snapshot.exists()) throw new Error('找不到這個房號。');
 
-          ...current.players,
+        const room = snapshot.val();
+        if (!room.players?.p1 || room.players.p1.left) {
+          throw new Error('房主已離開，請建立新房間。');
+        }
+        if (room.players.p2) {
+          throw new Error('這個房間已滿（最多兩人）。');
+        }
+        if (room.players.p1.id === sessionId) {
+          throw new Error('你已經是這個房間的房主。');
+        }
 
-          p2: playerRecord(name)
+        // 只鎖定第二位玩家的座位。此處 current === null 是正常的空座位，
+        // 即使本機尚未快取資料也不會誤判整間房間不存在。
+        // 若另一人先搶到座位，Firebase 會重試並讀到非 null，交易便取消。
+        const seatRef = ref(db, `rooms/${code}/players/p2`);
+        const mySeat = playerRecord(name);
+        const result = await runTransaction(seatRef, current => {
+          if (current !== null) return; // 座位已有玩家，絕不覆蓋。
+          return mySeat;
+        }, { applyLocally: false });
 
-        },
+        if (!result.committed) {
+          const latest = (await get(targetRef)).val();
+          if (!latest) throw new Error('房間已不存在。');
+          if (!latest.players?.p1 || latest.players.p1.left) {
+            throw new Error('房主已離開，請建立新房間。');
+          }
+          if (latest.players?.p2) {
+            throw new Error('這個房間已滿（最多兩人）。');
+          }
+          throw new Error('加入時發生衝突，請再試一次。');
+        }
 
-        updatedAt: Date.now()
+        // 加入後再次確認房間和房主仍存在，避免房間在加入過程中被刪除。
+        const joinedRoom = (await get(targetRef)).val();
+        if (!joinedRoom?.players?.p1 || joinedRoom.players.p1.left ||
+            joinedRoom.players?.p2?.id !== sessionId) {
+          // 如房間已被刪除，清理自己可能留下的孤立座位。
+          if (joinedRoom?.players?.p2?.id === sessionId && !joinedRoom.players?.p1) {
+            await runTransaction(seatRef, current =>
+              current?.id === sessionId ? null : undefined,
+              { applyLocally: false }
+            );
+          }
+          throw new Error('房間已關閉或房主已離開，請重新建立房間。');
+        }
 
-      };
-
-    }, { applyLocally: false });
-
-    if (!result.committed) {
-
-      const latest = (await get(targetRef)).val();
-
-      throw new Error(
-
-        !latest
-
-          ? '房間已不存在。'
-
-          : latest.players?.p2
-
-            ? '這個房間已滿（最多兩人）。'
-
-            : '房間狀態已改變，請確認房主仍在線上。'
-
-      );
-
+        await enterRoom(code, 'p2');
+        notify('成功加入！可以開始猜拳了。', 'ok');
+      } catch (e) {
+        notify('加入失敗：' + friendlyError(e), 'error');
+      } finally {
+        setBusy(false);
+      }
     }
-
-    await enterRoom(code, 'p2');
-
-    notify('成功加入！可以開始猜拳了。', 'ok');
-
-  } catch (e) {
-
-    notify('加入失敗：' + friendlyError(e), 'error');
-
-  } finally {
-
-    setBusy(false);
-
-  }
-
-}
 
     async function enterRoom(code, slot) {
 
