@@ -109,6 +109,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             background-color: transparent;
             color: #111111;
         }
+
+        /* 猜拳遊戲：沿用原本的黑白編輯式按鈕，改為外框款式 */
+        .game-button-outline {
+            background-color: transparent;
+            color: #111111;
+        }
+        .game-button-outline:hover,
+        .game-button-outline:focus-visible {
+            background-color: #111111;
+            color: #F7F5F0;
+        }
         .project-card { border-top: 1px solid #111; padding-top: 20px; transition: transform .25s ease; }
         .project-card:hover { transform: translateY(-4px); }
         .project-number { font-family: 'Noto Serif TC',serif; font-size: 13px; letter-spacing: .17em; color: #737373; }
@@ -336,12 +347,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     來玩玩看吧！
                 </h3>
             </div>
-            <a
-                href="game.html"
-                class="game-button"
-            >
-                玩我的小遊戲
-            </a>
+            <div class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 w-full">
+                <a
+                    href="game.html"
+                    class="game-button"
+                >
+                    玩我的小遊戲
+                </a>
+                <a
+                    href="rps.html"
+                    class="game-button game-button-outline"
+                    aria-label="前往雙人連線猜拳對決遊戲"
+                >
+                    猜拳對決｜雙人連線
+                </a>
+            </div>
 
         </section>
 
