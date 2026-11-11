@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#faf7ff">
+  <meta name="description" content="雙人連線猜拳遊戲，以 Firebase Realtime Database 即時同步。">
+  <title>猜拳對決｜雲端雙人遊戲</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #36324a; --muted: #767287; --lavender: #8169c2;
+      --lavender-light: #eee7ff; --peach: #ffe5db; --mint: #e0f6ed;
+      --border: #eae5f2; --card: rgba(255,255,255,.94);
+      --shadow: 0 16px 44px rgba(70,53,112,.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      color: var(--ink); background:
+        radial-gradient(circle at 9% 7%, #e7ddff 0, transparent 36%),
+        radial-gradient(circle at 95% 24%, #ffe5d8 0, transparent 32%),
+        radial-gradient(circle at 57% 96%, #dff7ee 0, transparent 35%), #faf8fd;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #b49bf1; outline-offset: 2px; }
+    [hidden] { display: none !important; }
+    .shell { width: min(960px, calc(100% - 30px)); margin: 0 auto; padding: 27px 0 48px; }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 23px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 850; letter-spacing: .4px; }
+    .brand-icon { width: 43px; height: 43px; display: grid; place-items: center; background: white; border: 1px solid var(--border); border-radius: 15px; font-size: 23px; box-shadow: 0 5px 18px #7563aa10; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 999px; padding: 8px 12px; background: #fff; color: var(--muted); font-size: 13px; font-weight: 700; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #e1a44b; }
+    .pill.good .dot { background: #4fbd91; } .pill.bad .dot { background: #e57979; }
+    .hero { text-align: center; margin: 30px auto 31px; }
+    .eyebrow { color: var(--lavender); font-weight: 800; font-size: 12px; letter-spacing: 2.5px; }
+    h1 { font-size: clamp(32px, 6vw, 52px); margin: 10px 0 11px; line-height: 1.25; letter-spacing: -1px; }
+    h2 { margin: 0 0 9px; font-size: 23px; } h3 { margin: 0 0 13px; }
+    .sub { color: var(--muted); line-height: 1.7; margin: 0; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 26px; box-shadow: var(--shadow); padding: 27px; }
+    .entry { max-width: 720px; margin: 0 auto; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0 12px; }
+    label { display: block; font-size: 13px; font-weight: 800; color: #605976; margin-bottom: 9px; }
+    input { width: 100%; min-height: 48px; border-radius: 14px; border: 1.5px solid #e1dce9; background: #fff; color: var(--ink); padding: 11px 14px; }
+    input::placeholder { color: #b1aabc; }
+    .btn { min-height: 47px; padding: 12px 18px; border: none; border-radius: 14px; font-weight: 800; transition: transform .15s, background .15s; }
+    .btn:not(:disabled):active { transform: scale(.98); }
+    .primary { background: #8268ca; color: #fff; box-shadow: 0 8px 20px #8268ca33; }
+    .primary:hover:not(:disabled) { background: #7157ba; }
+    .secondary { background: var(--lavender-light); color: #65509b; }
+    .secondary:hover:not(:disabled) { background: #dfd1ff; }
+    .ghost { background: #f7f5fa; border: 1px solid var(--border); color: #756e85; }
+    .entry-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .hint { margin: 16px 0 0; font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .notice { max-width: 720px; margin: 0 auto 18px; padding: 13px 17px; border-radius: 14px; font-size: 14px; line-height: 1.6; border: 1px solid #e8d5a7; background: #fffbec; color: #80612a; }
+    .notice.error { background: #fff0f0; border-color: #f5d0d0; color: #a14450; }
+    .notice.ok { background: #edfaf3; border-color: #cfeedd; color: #276d52; }
+    .room-heading { display: flex; gap: 18px; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+    .room-num { display: inline-block; color: #7353b5; letter-spacing: 4px; font-size: 35px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .room-row { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+    .tiny { padding: 9px 12px; min-height: 37px; font-size: 12px; }
+    .players { display: grid; grid-template-columns: 1fr auto 1fr; gap: 15px; align-items: center; }
+    .player { text-align: center; border-radius: 20px; padding: 21px 14px; min-width: 0; background: #f5f0ff; }
+    .player:nth-child(3) { background: #eaf7f1; }
+    .avatar { font-size: 38px; }
+    .player-name { font-weight: 850; font-size: 18px; overflow-wrap: anywhere; margin: 9px 0 4px; }
+    .player-status { font-size: 12px; color: #7b718a; min-height: 18px; }
+    .score { font-size: 37px; font-weight: 900; margin-top: 10px; line-height: 1; font-variant-numeric: tabular-nums; }
+    .versus { color: #a29ab0; font-weight: 900; font-size: 17px; }
+    .battle { margin-top: 17px; text-align: center; }
+    .round-tag { border-radius: 999px; background: #f2ecff; color: #7058ae; display: inline-block; padding: 8px 15px; font-size: 13px; font-weight: 800; }
+    .battle h2 { margin-top: 15px; }
+    .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 21px auto; max-width: 650px; }
+    .choice { padding: 17px 12px; border: 2px solid #ede7f6; background: #fff; border-radius: 20px; color: var(--ink); min-height: 119px; }
+    .choice .emoji { display: block; font-size: 42px; line-height: 1.2; margin-bottom: 6px; }
+    .choice .choice-label { font-size: 17px; font-weight: 850; }
+    .choice:hover:not(:disabled) { border-color: #bba9e8; background: #fdfbff; }
+    .choice.selected { background: #f1eaff; border-color: #9477d4; }
+    .result { margin: 16px auto 0; max-width: 600px; padding: 19px; border-radius: 18px; background: #fff7ee; border: 1px solid #f9e7cb; }
+    .result strong { display: block; font-size: 25px; margin: 4px 0 8px; }
+    .reveal { color: #655d72; font-size: 14px; line-height: 1.6; }
+    .battle-actions { margin-top: 19px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .footer { text-align: center; color: #9691a5; font-size: 12px; line-height: 1.7; padding-top: 24px; }
+    @media (max-width: 610px) {
+      .shell { width: min(100% - 22px, 470px); padding-top: 15px; }
+      .header { margin-bottom: 7px; } .hero { margin: 20px auto; }
+      .card { padding: 20px 15px; border-radius: 20px; }
+      .fields, .entry-actions { grid-template-columns: 1fr; }
+      .players { gap: 7px; } .player { padding: 16px 8px; }
+      .avatar { font-size: 30px; } .player-name { font-size: 15px; }
+      .score { font-size: 31px; } .versus { font-size: 13px; }
+      .choices { gap: 7px; } .choice { min-height: 107px; padding: 14px 6px; }
+      .choice .emoji { font-size: 34px; } .choice .choice-label { font-size: 15px; }
+      .room-num { font-size: 31px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div class="brand"><div class="brand-icon">✊</div><span>猜拳對決 <span style="color:#9c8daf;font-size:12px">ONLINE</span></span></div>
+      <div id="connectionBadge" class="pill"><span class="dot"></span><span id="connectionLabel">等待設定 Firebase</span></div>
+    </header>
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+    <section id="homeView">
+      <div class="hero">
+        <div class="eyebrow">ROCK · PAPER · SCISSORS</div>
+        <h1>一起玩猜拳吧！</h1>
+        <p class="sub">邀請朋友加入同一間房間，看看誰是猜拳王 ✨</p>
+      </div>
+      <div class="card entry">
+        <h2>開始對戰</h2>
+        <p class="sub">不需要註冊帳號，輸入暱稱就可以開始。</p>
+        <div class="fields">
+          <div><label for="nickname">你的暱稱</label><input id="nickname" type="text" maxlength="16" autocomplete="nickname" placeholder="例如：小星星"></div>
+          <div><label for="roomInput">好友的 4 位數房號</label><input id="roomInput" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="例如：4827" autocomplete="off"></div>
+        </div>
+        <div class="entry-actions">
+          <button id="createBtn" class="btn primary" type="button">✨ 建立新房間</button>
+          <button id="joinBtn" class="btn secondary" type="button">🚪 輸入房號加入</button>
+        </div>
+        <p class="hint">房號最多可供 2 位玩家對戰。當雙方都選好出拳，才會公開答案並結算比分。</p>
+      </div>
+    </section>
+
+    <section id="gameView" hidden>
+      <div class="card">
+        <div class="room-heading">
+          <div>
+            <div style="color:#8a849a;font-size:13px;font-weight:800">好友對戰房間</div>
+            <div class="room-row"><span id="roomCode" class="room-num">----</span><button id="copyBtn" class="btn ghost tiny" type="button">複製房號</button></div>
+          </div>
+          <button id="leaveBtn" class="btn ghost tiny" type="button">離開房間</button>
+        </div>
+
+        <div class="players">
+          <div class="player"><div class="avatar">🧑‍🚀</div><div id="p1Name" class="player-name">等待玩家</div><div id="p1Status" class="player-status">尚未連線</div><div id="p1Score" class="score">0</div></div>
+          <div class="versus">VS</div>
+          <div class="player"><div class="avatar">👩‍🚀</div><div id="p2Name" class="player-name">等待玩家</div><div id="p2Status" class="player-status">尚未連線</div><div id="p2Score" class="score">0</div></div>
+        </div>
+
+        <div class="battle">
+          <div id="roundTag" class="round-tag">第 1 局</div>
+          <h2 id="battleTitle">等待對手加入...</h2>
+          <p id="battleText" class="sub" aria-live="polite">請將房號分享給好友。</p>
+          <div class="choices" aria-label="選擇出拳">
+            <button class="choice" data-choice="rock" type="button"><span class="emoji">✊</span><span class="choice-label">石頭</span></button>
+            <button class="choice" data-choice="paper" type="button"><span class="emoji">✋</span><span class="choice-label">布</span></button>
+            <button class="choice" data-choice="scissors" type="button"><span class="emoji">✌️</span><span class="choice-label">剪刀</span></button>
+          </div>
+          <div id="resultBox" class="result" hidden><strong id="resultTitle">本局結果</strong><div id="resultDetail" class="reveal"></div></div>
+          <div class="battle-actions"><button id="nextBtn" class="btn primary" type="button" hidden>🔄 再來一局</button></div>
+        </div>
+      </div>
+    </section>
+    <footer class="footer">雙人即時對戰・Firebase Realtime Database<br>不需要填寫真實姓名或個人資料</footer>
+  </main>
+
+  <!-- 單一 HTML 檔案，Firebase SDK 由官方 CDN 載入，需連上網際網路。 -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+    import {
+      getDatabase, ref, onValue, runTransaction, set, remove, onDisconnect
+    } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js';
+
+    // =============================================================
+    // ★ 步驟 4：將 Firebase Console 複製的 firebaseConfig 貼在這裡 ★
+    // 注意：使用 Realtime Database，並確認有 databaseURL。
+    // 請取代下面空字串；Firebase 尚未設定時，遊戲會提示你。
+    // =============================================================
+    const firebaseConfig = {
+  apiKey: "AIzaSyACfeyry9494ni7fTnP2pgNhVz3aNx_XVg",
+  authDomain: "rps-411214130.firebaseapp.com",
+  databaseURL: "https://rps-411214130-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "rps-411214130",
+  storageBucket: "rps-411214130.firebasestorage.app",
+  messagingSenderId: "638416635984",
+  appId: "1:638416635984:web:bed7644d265c972daca955"
+ };
+    // =============================================================
+
+    const $ = id => document.getElementById(id);
+    const choiceNames = { rock: '石頭 ✊', paper: '布 ✋', scissors: '剪刀 ✌️' };
+    const buttons = [...document.querySelectorAll('[data-choice]')];
+    const sessionIdKey = 'rps_session_id';
+    const activeKey = 'rps_active_room';
+    const generateId = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    let sessionId = sessionStorage.getItem(sessionIdKey);
+    if (!sessionId) { sessionId = generateId(); sessionStorage.setItem(sessionIdKey, sessionId); }
+
+    let db = null;
+    let serverConnected = false;
+    let busy = false;
+    let roomCode = null;
+    let mySlot = null;
+    let roomData = null;
+    let unsubRoom = null;
+    let presenceRef = null;
+    let presenceArmed = false;
+    let presencePending = false;
+    let revealingKey = null;
+    let settlingKey = null;
+
+    const configReady = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'appId']
+      .every(key => typeof firebaseConfig[key] === 'string' && firebaseConfig[key].trim());
+
+    function notify(text, kind = '') {
+      const node = $('notice');
+      node.textContent = text;
+      node.className = 'notice' + (kind ? ' ' + kind : '');
+      node.hidden = !text;
+    }
+    function status(text, kind = '') {
+      $('connectionLabel').textContent = text;
+      $('connectionBadge').className = 'pill' + (kind ? ' ' + kind : '');
+    }
+    function setBusy(value) {
+      busy = value;
+      $('createBtn').disabled = value || !configReady;
+      $('joinBtn').disabled = value || !configReady;
+      $('leaveBtn').disabled = value;
+      render();
+    }
+    function cleanName() {
+      const name = $('nickname').value.trim().replace(/\s+/g, ' ');
+      if (!name) { notify('請先輸入你的暱稱。', 'error'); $('nickname').focus(); return null; }
+      return name.slice(0, 16);
+    }
+    function roomRef(code = roomCode) { return ref(db, `rooms/${code}`); }
+    function playerRecord(name) { return { id: sessionId, name, left: false, joinedAt: Date.now() }; }
+    function moveKey(code, round, slot) { return `rps_move_${code}_${round}_${slot}`; }
+    function getSavedMove(code, round, slot) {
+      try { return JSON.parse(sessionStorage.getItem(moveKey(code, round, slot)) || 'null'); }
+      catch { return null; }
+    }
+    function isOnline(room, slot) {
+      return !room.players?.[slot]?.left && Object.values(room.connections?.[slot] || {}).some(Boolean);
+    }
+    function bothOnline(room) {
+      return !!(room.players?.p1 && room.players?.p2 && isOnline(room, 'p1') && isOnline(room, 'p2'));
+    }
+    function myPlayerExists(room) {
+      return !!(room?.players?.[mySlot] && room.players[mySlot].id === sessionId && !room.players[mySlot].left);
+    }
+
+    // 猜拳結果由兩位玩家都提交的承諾值、公開的選擇與原子交易產生。
+    function winner(a, b) {
+      if (a === b) return 'tie';
+      return ((a === 'rock' && b === 'scissors') ||
+        (a === 'scissors' && b === 'paper') ||
+        (a === 'paper' && b === 'rock')) ? 'p1' : 'p2';
+    }
+    function hex(bytes) { return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(''); }
+    function randomSalt() {
+      const bytes = new Uint8Array(18);
+      crypto.getRandomValues(bytes);
+      return hex(bytes);
+    }
+    // commit-reveal：在「兩人都出拳」前，雲端只有 SHA-256 雜湊，沒有明文選擇。
+    async function commitment(code, round, choice, salt) {
+      if (!crypto.subtle) throw new Error('此瀏覽器需要 HTTPS 才能使用安全出拳功能。請透過 GitHub Pages 網址開啟。');
+      const input = new TextEncoder().encode(`${code}|${round}|${choice}|${salt}`);
+      return hex(new Uint8Array(await crypto.subtle.digest('SHA-256', input)));
+    }
+    function newRoom(name) {
+      return {
+        createdAt: Date.now(), updatedAt: Date.now(), round: 1,
+        players: { p1: playerRecord(name) },
+        scores: { p1: 0, p2: 0 }
+      };
+    }
+
+    async function createRoom() {
+      const name = cleanName(); if (!name || busy || !db) return;
+      setBusy(true); notify('正在建立新房間...');
+      try {
+        for (let attempt = 0; attempt < 30; attempt++) {
+          const bytes = new Uint32Array(1); crypto.getRandomValues(bytes);
+          const code = String(bytes[0] % 10000).padStart(4, '0');
+          const result = await runTransaction(roomRef(code), current => {
+            if (current !== null) return; // 已有房間：重抽，不覆蓋。
+            return newRoom(name);
+          }, { applyLocally: false });
+          if (result.committed) {
+            await enterRoom(code, 'p1');
+            notify('房間建立成功！分享 4 位數房號給朋友。', 'ok');
+            return;
+          }
+        }
+        throw new Error('目前找不到可用房號，請稍後重試。');
+      } catch (e) { notify('建立失敗：' + friendlyError(e), 'error'); }
+      finally { setBusy(false); }
+    }
+
+    async function joinRoom() {
+      const name = cleanName(); if (!name || busy || !db) return;
+      const code = $('roomInput').value.trim();
+      if (!/^\d{4}$/.test(code)) { notify('請輸入完整的 4 位數房號（例如 0042）。', 'error'); return; }
+      setBusy(true); notify('正在加入房間...');
+      try {
+        const result = await runTransaction(roomRef(code), current => {
+          if (!current || !current.players?.p1 || current.players.p1.left || current.players.p2) return;
+          if (current.players.p1.id === sessionId) return;
+          return {
+            ...current,
+            players: { ...current.players, p2: playerRecord(name) },
+            updatedAt: Date.now()
+          };
+        }, { applyLocally: false });
+        if (!result.committed) {
+          const state = result.snapshot.val();
+          throw new Error(!state ? '找不到這個房號。' : state.players?.p2 ? '這個房間已滿（最多兩人）。' : '此房間無法加入，請房主建立新房間。');
+        }
+        await enterRoom(code, 'p2');
+        notify('成功加入！可以開始猜拳了。', 'ok');
+      } catch (e) { notify('加入失敗：' + friendlyError(e), 'error'); }
+      finally { setBusy(false); }
+    }
+
+    async function enterRoom(code, slot) {
+      if (unsubRoom) unsubRoom();
+      roomCode = code;
+      mySlot = slot;
+      roomData = null;
+      presenceRef = null;
+      presenceArmed = false;
+      presencePending = false;
+      sessionStorage.setItem(activeKey, JSON.stringify({ code, slot }));
+      $('homeView').hidden = true;
+      $('gameView').hidden = false;
+      $('roomCode').textContent = code;
+      unsubRoom = onValue(roomRef(), snapshot => {
+        const value = snapshot.val();
+        if (!value || !myPlayerExists(value)) {
+          notify('房間已不存在，或你已離開這個房間。請重新建立。', 'error');
+          resetRoom();
+          return;
+        }
+        roomData = value;
+        render();
+        progressRound(value).catch(e => notify('同步出拳時發生問題：' + friendlyError(e), 'error'));
+      }, error => notify('監聽房間失敗：' + friendlyError(error), 'error'));
+      if (serverConnected) await armPresence();
+      render();
+    }
+
+    // 每次載入頁面有獨立的 presence 連線，舊分頁斷線不會覆蓋新連線。
+    async function armPresence() {
+      if (!db || !roomCode || !mySlot || !serverConnected || presenceArmed || presencePending) return;
+      presencePending = true;
+      const code = roomCode, slot = mySlot;
+      const connectionId = generateId();
+      const myPresence = ref(db, `rooms/${code}/connections/${slot}/${connectionId}`);
+      try {
+        await onDisconnect(myPresence).remove();
+        if (code !== roomCode || slot !== mySlot) { await onDisconnect(myPresence).cancel(); return; }
+        await set(myPresence, true);
+        presenceRef = myPresence;
+        presenceArmed = true;
+      } catch (e) { notify('連線狀態設定失敗：' + friendlyError(e), 'error'); }
+      finally { presencePending = false; render(); }
+    }
+
+    async function submitMove(choice) {
+      if (!db || !roomCode || !roomData || busy || !bothOnline(roomData) || !myPlayerExists(roomData)) return;
+      if (roomData.commits?.[mySlot] || roomData.result) return;
+      const code = roomCode, slot = mySlot, round = roomData.round;
+      setBusy(true);
+      try {
+        const salt = randomSalt();
+        const hash = await commitment(code, round, choice, salt);
+        // 先將自己的選擇留在本機，網路斷線/重整仍可完成公開階段。
+        sessionStorage.setItem(moveKey(code, round, slot), JSON.stringify({ choice, salt, hash }));
+        const result = await runTransaction(roomRef(code), current => {
+          if (!current || current.round !== round || current.result || !bothOnline(current) ||
+              current.players?.[slot]?.id !== sessionId || current.commits?.[slot]) return;
+          return {
+            ...current,
+            commits: { ...(current.commits || {}), [slot]: hash },
+            updatedAt: Date.now()
+          };
+        }, { applyLocally: false });
+        if (!result.committed) {
+          sessionStorage.removeItem(moveKey(code, round, slot));
+          throw new Error('這局可能已結束，或對方暫時離線，請確認畫面後重試。');
+        }
+      } catch (e) { notify('出拳失敗：' + friendlyError(e), 'error'); }
+      finally { setBusy(false); }
+    }
+
+    async function progressRound(room) {
+      if (!roomCode || !myPlayerExists(room) || room.result) return;
+      const code = roomCode, round = room.round, slot = mySlot;
+      const key = `${code}/${round}`;
+      if (!room.commits?.p1 || !room.commits?.p2) return;
+
+      // 兩人都鎖定出拳後，才公開各自的出拳和隨機鹽值。
+      if (!room.reveals?.[slot] && revealingKey !== key) {
+        const own = getSavedMove(code, round, slot);
+        if (!own || own.hash !== room.commits[slot]) {
+          notify('此局的本機出拳紀錄遺失，無法安全公開。請雙方離開後重新開房。', 'error');
+          return;
+        }
+        revealingKey = key;
+        try {
+          await runTransaction(roomRef(code), current => {
+            if (!current || current.round !== round || !current.commits?.p1 || !current.commits?.p2 ||
+                current.result || current.reveals?.[slot] || current.commits[slot] !== own.hash) return;
+            return {
+              ...current,
+              reveals: { ...(current.reveals || {}), [slot]: { choice: own.choice, salt: own.salt } },
+              updatedAt: Date.now()
+            };
+          }, { applyLocally: false });
+        } finally { revealingKey = null; }
+      }
+
+      if (room.reveals?.p1 && room.reveals?.p2 && settlingKey !== key) {
+        settlingKey = key;
+        try {
+          const valid = await Promise.all(['p1', 'p2'].map(async s => {
+            const reveal = room.reveals[s];
+            if (!choiceNames[reveal.choice] || typeof reveal.salt !== 'string') return false;
+            return (await commitment(code, round, reveal.choice, reveal.salt)) === room.commits[s];
+          }));
+          if (!valid.every(Boolean)) throw new Error('出拳驗證失敗：公開內容與原先鎖定的不一致。');
+          const a = room.reveals.p1.choice, b = room.reveals.p2.choice;
+          const victor = winner(a, b);
+          // 整局比分和結果一起寫入同一次 transaction；即使兩人同時結算，也只加一次。
+          await runTransaction(roomRef(code), current => {
+            if (!current || current.round !== round || current.result ||
+                !current.reveals?.p1 || !current.reveals?.p2 ||
+                current.commits?.p1 !== room.commits.p1 || current.commits?.p2 !== room.commits.p2 ||
+                current.reveals.p1.choice !== a || current.reveals.p2.choice !== b) return;
+            const scores = { p1: current.scores?.p1 || 0, p2: current.scores?.p2 || 0 };
+            if (victor !== 'tie') scores[victor] += 1;
+            return {
+              ...current, scores,
+              result: { round, p1: a, p2: b, winner: victor, at: Date.now() },
+              updatedAt: Date.now()
+            };
+          }, { applyLocally: false });
+        } finally { settlingKey = null; }
+      }
+    }
+
+    async function nextRound() {
+      if (!roomData?.result || busy || !roomCode || !bothOnline(roomData)) return;
+      const code = roomCode, round = roomData.round;
+      setBusy(true);
+      try {
+        const outcome = await runTransaction(roomRef(code), current => {
+          if (!current || current.round !== round || !current.result || !bothOnline(current)) return;
+          const updated = { ...current, round: round + 1, updatedAt: Date.now() };
+          delete updated.commits; delete updated.reveals; delete updated.result;
+          return updated;
+        }, { applyLocally: false });
+        if (!outcome.committed) notify('對方可能已經開始下一局，請依照目前畫面操作。');
+        sessionStorage.removeItem(moveKey(code, round, mySlot));
+      } catch (e) { notify('無法開始下一局：' + friendlyError(e), 'error'); }
+      finally { setBusy(false); }
+    }
+
+    async function leaveRoom() {
+      if (!roomCode || busy) return;
+      setBusy(true);
+      const code = roomCode, slot = mySlot;
+      try {
+        if (presenceRef) {
+          await onDisconnect(presenceRef).cancel();
+          await remove(presenceRef);
+        }
+        await runTransaction(roomRef(code), current => {
+          if (!current || current.players?.[slot]?.id !== sessionId) return;
+          if (slot === 'p1' && !current.players.p2) return null; // 無對手時可釋放房號。
+          return {
+            ...current, players: {
+              ...current.players,
+              [slot]: { ...current.players[slot], left: true }
+            }, updatedAt: Date.now()
+          };
+        }, { applyLocally: false });
+        resetRoom();
+        notify('已離開房間。想再玩可以重新建立新房間。', 'ok');
+      } catch (e) { notify('離開房間時發生問題：' + friendlyError(e), 'error'); }
+      finally { setBusy(false); }
+    }
+
+    function resetRoom() {
+      if (unsubRoom) { unsubRoom(); unsubRoom = null; }
+      roomCode = null; mySlot = null; roomData = null; presenceRef = null;
+      presenceArmed = false; presencePending = false;
+      revealingKey = null; settlingKey = null;
+      sessionStorage.removeItem(activeKey);
+      $('homeView').hidden = false;
+      $('gameView').hidden = true;
+      render();
+    }
+
+    function render() {
+      if (!roomCode || !roomData) return;
+      const room = roomData;
+      const one = room.players?.p1, two = room.players?.p2;
+      const own = room.players?.[mySlot], otherSlot = mySlot === 'p1' ? 'p2' : 'p1';
+      const other = room.players?.[otherSlot];
+      const waiting = !two, left = !!other?.left;
+      const online = bothOnline(room);
+      const committed = !!room.commits?.[mySlot];
+      const bothCommitted = !!(room.commits?.p1 && room.commits?.p2);
+      const result = room.result;
+
+      $('roomCode').textContent = roomCode;
+      $('roundTag').textContent = `第 ${room.round} 局`;
+      $('p1Name').textContent = one ? one.name + (mySlot === 'p1' ? '（你）' : '') : '等待玩家';
+      $('p2Name').textContent = two ? two.name + (mySlot === 'p2' ? '（你）' : '') : '等待玩家';
+      $('p1Status').textContent = one ? (one.left ? '已離開' : isOnline(room, 'p1') ? '● 在線上' : '○ 暫時離線') : '尚未加入';
+      $('p2Status').textContent = two ? (two.left ? '已離開' : isOnline(room, 'p2') ? '● 在線上' : '○ 暫時離線') : '等待加入';
+      $('p1Score').textContent = room.scores?.p1 ?? 0;
+      $('p2Score').textContent = room.scores?.p2 ?? 0;
+
+      const ready = online && !result && !committed && !busy && serverConnected && !own?.left;
+      buttons.forEach(button => {
+        button.disabled = !ready;
+        button.classList.toggle('selected', committed && getSavedMove(roomCode, room.round, mySlot)?.choice === button.dataset.choice);
+      });
+      $('resultBox').hidden = !result;
+      $('nextBtn').hidden = !result;
+      $('nextBtn').disabled = !result || !online || busy || !serverConnected;
+
+      if (result) {
+        let resultTitle;
+        if (result.winner === 'tie') resultTitle = '平手！再比一次 🤝';
+        else resultTitle = result.winner === mySlot ? '你贏了！太厲害了 🎉' : '這局對手獲勝，加油！ 💪';
+        $('resultTitle').textContent = resultTitle;
+        $('resultDetail').textContent = `${one?.name || '玩家 1'}：${choiceNames[result.p1]}　｜　${two?.name || '玩家 2'}：${choiceNames[result.p2]}`;
+        $('battleTitle').textContent = '本局結束';
+        $('battleText').textContent = left ? '對手已離開，請另開一間房間再玩。' : online ? '想繼續嗎？按「再來一局」！' : '對手暫時離線，恢復連線後可以再來一局。';
+      } else if (waiting) {
+        $('battleTitle').textContent = '等待好友加入...';
+        $('battleText').textContent = '把上方 4 位數房號傳給朋友，就能開始遊戲。';
+      } else if (left) {
+        $('battleTitle').textContent = '對手已離開 👋';
+        $('battleText').textContent = '這間房間的對戰已結束，請離開並建立新房間。';
+      } else if (!serverConnected) {
+        $('battleTitle').textContent = '連線暫時中斷';
+        $('battleText').textContent = '正在嘗試重新連線，請保持網路暢通。';
+      } else if (!online) {
+        $('battleTitle').textContent = '等待對手重新連線...';
+        $('battleText').textContent = '若對方已關閉網頁，請等他重新開啟，或一起開新房。';
+      } else if (bothCommitted) {
+        $('battleTitle').textContent = '兩人都出拳了！';
+        $('battleText').textContent = '正在安全公開選擇並結算結果...';
+      } else if (committed) {
+        $('battleTitle').textContent = '你已經出拳！✅';
+        $('battleText').textContent = '你的選擇已鎖定，等待對方出拳後一起公布。';
+      } else {
+        $('battleTitle').textContent = '選擇你的出拳！';
+        $('battleText').textContent = `你是 ${own?.name || '玩家'}，準備好就按下石頭、剪刀或布。`;
+      }
+    }
+
+    function friendlyError(error) {
+      const msg = error?.message || String(error);
+      if (/permission.denied|permission_denied/i.test(msg)) return '資料庫拒絕存取。請確認 Realtime Database 規則已發布，且 databaseURL 正確。';
+      if (/network|offline|disconnected/i.test(msg)) return '網路似乎已中斷，請檢查 Wi-Fi 或行動網路。';
+      return msg;
+    }
+
+    $('createBtn').addEventListener('click', createRoom);
+    $('joinBtn').addEventListener('click', joinRoom);
+    $('leaveBtn').addEventListener('click', leaveRoom);
+    $('nextBtn').addEventListener('click', nextRound);
+    buttons.forEach(button => button.addEventListener('click', () => submitMove(button.dataset.choice)));
+    $('roomInput').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+    $('roomInput').addEventListener('keydown', e => { if (e.key === 'Enter') joinRoom(); });
+    $('nickname').addEventListener('keydown', e => { if (e.key === 'Enter') createRoom(); });
+    $('copyBtn').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(roomCode); notify('房號已複製，可以傳給朋友了！', 'ok'); }
+      catch { notify('複製失敗，請直接記下上方的房號。'); }
+    });
+
+    if (!configReady) {
+      status('尚未設定 Firebase', 'bad');
+      notify('尚未設定 Firebase。請在 rps.html 裡搜尋 firebaseConfig，貼上你自己的 Firebase Web 專案設定（包含 databaseURL）。');
+      $('createBtn').disabled = true;
+      $('joinBtn').disabled = true;
+    } else {
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getDatabase(app);
+        status('正在連線...', '');
+        onValue(ref(db, '.info/connected'), snapshot => {
+          serverConnected = snapshot.val() === true;
+          status(serverConnected ? 'Firebase 已連線' : '網路未連線', serverConnected ? 'good' : 'bad');
+          if (!serverConnected) { presenceArmed = false; presencePending = false; }
+          if (serverConnected && roomCode) armPresence();
+          render();
+        }, error => notify('無法取得 Firebase 連線狀態：' + friendlyError(error), 'error'));
+        const saved = JSON.parse(sessionStorage.getItem(activeKey) || 'null');
+        if (saved && /^\d{4}$/.test(saved.code) && ['p1', 'p2'].includes(saved.slot)) {
+          // 重新整理網頁時，沿用此分頁的玩家身分和出拳紀錄。
+          enterRoom(saved.code, saved.slot).catch(e => { resetRoom(); notify('恢復房間失敗：' + friendlyError(e), 'error'); });
+        }
+      } catch (e) {
+        status('Firebase 初始化失敗', 'bad');
+        notify('Firebase 設定有誤：' + friendlyError(e), 'error');
+        $('createBtn').disabled = true;
+        $('joinBtn').disabled = true;
+      }
+    }
+  </script>
+</body>
+</html>
