@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#191d25">
+  <title>簡報底圖產生器｜由主視覺延伸配色與簡報背景</title>
+  <meta name="description" content="上傳主視覺圖片，自動擷取六組 HEX 配色，產生四款同色調的 16:9 簡報底圖。可複製色碼並下載 1920×1080 PNG，免註冊、圖片只在瀏覽器處理。">
+  <link rel="icon" type="image/svg+xml" href="slide-bg-favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="簡報底圖產生器｜用一張主視覺，延伸整套簡報風格">
+  <meta property="og:description" content="自動配色、四款 16:9 簡報底圖、HEX 色碼與 PNG 下載。">
+  <meta property="og:image" content="https://ruby750.github.io/again-again/slide-bg-og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://ruby750.github.io/again-again/slide-bg-generator.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="簡報底圖產生器">
+  <meta name="twitter:description" content="用主視覺圖片產生配色和四種簡報背景。">
+  <meta name="twitter:image" content="https://ruby750.github.io/again-again/slide-bg-og.png">
+  <!-- 與個人首頁相同的 GTM 容器，GA4 事件仍須在 GTM 中設定 -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PG6DHGT6');</script>
+  <style>
+    :root{--ink:#1b2029;--muted:#626771;--paper:#f6f5f0;--white:#fff;--border:#deded8;--accent:#ef764c;--peach:#fff0e9;--shadow:0 18px 55px rgba(25,32,41,.09)}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:15px;line-height:1.6}
+    button,input{font:inherit} button{cursor:pointer} a{color:inherit;text-decoration:none}
+    a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .wrap{width:min(1160px,calc(100% - 48px));margin:auto}
+    .topbar{background:var(--ink);color:white}
+    .topbar .wrap{display:flex;justify-content:space-between;align-items:center;min-height:68px;gap:16px}
+    .brand{font-weight:800;letter-spacing:.08em;display:flex;align-items:center;gap:11px}
+    .brandmark{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:var(--ink);font-weight:900}
+    .back-link{border:1px solid #ffffff55;border-radius:999px;padding:8px 16px;font-size:13px;transition:.2s}
+    .back-link:hover{background:#fff2}
+    .hero{padding:64px 0 38px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:42px;align-items:end}
+    .eyebrow{font-weight:800;color:#d85e32;letter-spacing:.15em;font-size:12px;margin:0 0 12px}
+    h1,h2,h3,p{margin-top:0}
+    h1{font-size:clamp(38px,4.7vw,64px);font-weight:850;line-height:1.18;letter-spacing:-.04em;margin-bottom:18px}
+    h1 em{font-style:normal;color:#d9603c}
+    .hero-lead{font-size:17px;color:#5f6670;line-height:1.9;max-width:680px;margin:0}
+    .hero-note{border-top:2px solid var(--ink);padding:17px 0 0;color:#59616c;font-size:13px;line-height:1.95}
+    .steps{display:flex;gap:8px;flex-wrap:wrap;margin:26px 0 0;align-items:center}
+    .step{padding:7px 12px;border-radius:999px;background:#e9e8e2;font-size:12px;font-weight:700}
+    .step-arrow{color:#b1afa7}
+    .workspace{display:grid;grid-template-columns:390px minmax(0,1fr);gap:24px;align-items:start;padding-bottom:36px}
+    .panel{background:#fff;border:1px solid #e3e2db;border-radius:22px;box-shadow:var(--shadow)}
+    .left-pane{padding:25px;position:sticky;top:20px}
+    .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:17px}
+    .section-title{font-size:19px;font-weight:800;margin:0}
+    .tiny{color:#858891;font-size:11px}
+    .upload-zone{position:relative;border:2px dashed #c8c8c3;border-radius:18px;padding:25px 15px;background:#faf9f5;text-align:center;min-height:212px;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:.2s;overflow:hidden}
+    .upload-zone.dragover{background:var(--peach);border-color:var(--accent)}
+    .upload-icon{width:48px;height:48px;background:#ffede6;border-radius:16px;display:grid;place-items:center;margin:0 auto 12px;font-size:25px}
+    .upload-title{font-size:16px;font-weight:800}
+    .upload-sub{color:#7b7c80;font-size:12px;line-height:1.9}
+    .file-btn{margin-top:16px;border:1px solid var(--ink);padding:9px 20px;border-radius:999px;background:var(--ink);color:white;font-weight:700;font-size:13px}
+    .file-btn:hover{background:#444a53}
+    .upload-zone.has-image{padding:0;background:#f1efea;border-style:solid;min-height:212px}
+    .upload-zone.has-image #uploadIntro{display:none}
+    .source-preview{width:100%;height:220px;object-fit:contain;display:none}
+    .upload-zone.has-image .source-preview{display:block}
+    .upload-zone.has-image .replace-btn{display:inline-flex}
+    .replace-btn{display:none;position:absolute;bottom:11px;right:11px;background:#fffffff2;color:#1b2029;border:1px solid #e0dcd5;border-radius:999px;font-weight:700;padding:8px 13px;font-size:12px;box-shadow:0 3px 10px #0001}
+    .source-name{font-size:12px;color:#777b82;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:10px;min-height:18px}
+    .divider{height:1px;background:#ededeb;margin:22px 0}
+    .field-title{font-size:13px;font-weight:800;margin-bottom:10px}
+    .select-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+    .segmented{background:#f0f0eb;border-radius:12px;padding:4px;display:flex;gap:4px;flex:1}
+    .segmented button{flex:1;min-width:0;padding:8px 12px;border:0;border-radius:9px;background:transparent;font-size:12px;font-weight:700;color:#747780}
+    .segmented button.active{background:white;box-shadow:0 2px 9px #0001;color:#23272f}
+    .toggle-row{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:18px 0}
+    .toggle-row small{display:block;color:#898a90;font-size:11px;margin-top:2px}
+    .switch{appearance:none;width:43px;height:25px;border-radius:999px;background:#dbddd9;position:relative;flex-shrink:0;cursor:pointer;transition:.2s;border:0}
+    .switch:after{content:"";position:absolute;left:3px;top:3px;width:19px;height:19px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #0002;transition:.2s}
+    .switch:checked{background:var(--accent)}.switch:checked:after{transform:translateX(18px)}
+    .action-main{display:flex;justify-content:center;align-items:center;gap:8px;background:var(--accent);color:#1b2029;border:0;border-radius:12px;padding:14px 18px;font-weight:850;width:100%;box-shadow:0 7px 18px #ee754533}
+    .action-main:hover:not(:disabled){background:#fa8a63}.action-main:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+    .soft-btn{border:1px solid #dadcd7;border-radius:11px;padding:11px 14px;background:white;color:#333942;font-weight:750;font-size:13px}
+    .soft-btn:hover:not(:disabled){background:#f8f7f3}.soft-btn:disabled{opacity:.5;cursor:not-allowed}
+    .full{width:100%}
+    .palette-panel{padding:25px;margin-bottom:24px}
+    .section-sub{font-size:12px;color:#7c8088;margin:4px 0 0}
+    .palette{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:18px}
+    .swatch{border:1px solid #e2e2dc;background:#fff;border-radius:12px;overflow:hidden;text-align:left;padding:0;transition:transform .15s}
+    .swatch:hover{transform:translateY(-3px)}
+    .swatch-color{height:63px;display:block;background:var(--swatch)}
+    .swatch-code{display:block;font-size:10px;font-weight:800;letter-spacing:-.02em;text-align:center;padding:9px 1px 8px;color:#303641;font-variant-numeric:tabular-nums}
+    .swatch-label{font-size:10px;text-align:center;color:#8a8c91;display:block;padding-bottom:9px}
+    .palette-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap}
+    .right-pane{min-width:0}
+    .gallery-heading{margin:7px 0 16px;display:flex;align-items:end;justify-content:space-between;gap:12px}
+    .gallery-heading h2{font-size:24px;margin:0}
+    .gallery-heading p{margin:5px 0 0;color:#84868c;font-size:12px}
+    .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+    .template{min-width:0;border:1px solid #e3e3dc;background:#fff;border-radius:18px;padding:12px;box-shadow:0 9px 27px rgba(27,32,41,.05)}
+    .template-visual{aspect-ratio:16/9;border-radius:10px;background:#eae5dd;overflow:hidden;position:relative;}
+    .template-visual canvas{width:100%;height:100%;display:block}
+    .template-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:12px}
+    .template h3{font-size:14px;margin:0;font-weight:800}
+    .template small{font-size:11px;color:#8e9094}
+    .download{flex-shrink:0;font-size:12px;border:0;border-radius:10px;padding:9px 11px;background:#1b2029;color:#fff;font-weight:750}
+    .download:hover:not(:disabled){background:#434a54}.download:disabled{opacity:.35;cursor:not-allowed}
+    .hint-box{border:1px solid #e5dfd5;background:#fbf4eb;border-radius:14px;padding:14px 16px;margin-top:17px;color:#7c6b57;font-size:12px;line-height:1.8}
+    .footer{border-top:1px solid #dfded8;padding:24px 0 42px;color:#797c83;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    #toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#1c222b;color:white;font-size:13px;font-weight:650;padding:11px 18px;border-radius:999px;z-index:20;transition:.2s;max-width:calc(100% - 30px);text-align:center;box-shadow:0 8px 20px #0003}
+    #toast.show{transform:translate(-50%,0);opacity:1}
+    .upload-zone:focus-within{border-color:#ee764d}
+    .status{font-size:12px;min-height:18px;margin-top:14px;color:#676e78}
+    .credit{font-size:11px;color:#8d9097}
+    @media(max-width:1040px){.workspace{grid-template-columns:330px minmax(0,1fr)}.palette{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:790px){.wrap{width:min(640px,calc(100% - 32px))}.hero{grid-template-columns:1fr;padding:38px 0 29px;gap:22px}.hero-note{display:none}.workspace{grid-template-columns:1fr;gap:24px}.left-pane{position:static}.palette{grid-template-columns:repeat(6,minmax(0,1fr))}.gallery-heading{margin-top:8px}}
+    @media(max-width:520px){.brand > span:last-child > span{display:none}.topbar .wrap{min-height:60px}.brand{font-size:13px}.back-link{padding:6px 11px;font-size:12px}h1{font-size:37px}.hero-lead{font-size:14px}.steps{gap:5px}.step{font-size:11px;padding:6px 9px}.left-pane,.palette-panel{padding:19px}.palette{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.gallery{grid-template-columns:1fr}.gallery-heading h2{font-size:23px}.template-visual{aspect-ratio:16/9}.upload-zone{min-height:190px}.swatch-color{height:57px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="wrap"><a class="brand" href="slide-bg-generator.html"><span class="brandmark" aria-hidden="true">S</span><span>SLIDE STUDIO <span style="font-weight:400;opacity:.7">/ 簡報底圖產生器</span></span></a><a class="back-link" href="index.html">← 回個人首頁</a></div></header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="heroTitle"><div><p class="eyebrow">TOOL 02 &nbsp; / &nbsp; DESIGN HELPER</p><h1 id="heroTitle">一張主視覺，<br><em>延伸整套簡報風格。</em></h1><p class="hero-lead">不知道簡報背景怎麼搭？上傳你喜歡的主視覺，自動擷取色彩，產生四款適合放標題與內容的簡報底圖。讓整份報告看起來更一致。</p><div class="steps"><span class="step">01 上傳圖片</span><span class="step-arrow">→</span><span class="step">02 擷取配色</span><span class="step-arrow">→</span><span class="step">03 下載底圖</span></div></div><p class="hero-note">DESIGNED FOR YOUR PRESENTATION<br>16:9 &nbsp; • &nbsp; 1920 × 1080 PNG<br>無需註冊，圖片只在你的瀏覽器中處理。</p></section>
+    <div class="workspace">
+      <aside class="panel left-pane" aria-label="主視覺與生成設定">
+        <div class="section-head"><h2 class="section-title">01 / 上傳主視覺</h2><span class="tiny">JPG · PNG · WEBP</span></div>
+        <div class="upload-zone" id="dropZone" role="group" aria-label="圖片上傳區">
+          <div id="uploadIntro"><span class="upload-icon" aria-hidden="true">↥</span><div class="upload-title">將圖片拖曳到這裡</div><div class="upload-sub">或點擊下方按鈕選擇圖片<br>最大 15 MB</div><button id="chooseBtn" class="file-btn" type="button">選擇主視覺圖片</button></div>
+          <img id="sourcePreview" class="source-preview" alt="已上傳的主視覺預覽">
+          <button id="replaceBtn" class="replace-btn" type="button">更換圖片 ↗</button>
+        </div>
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        <div class="source-name" id="sourceName" aria-live="polite">尚未選擇圖片</div>
+        <div class="divider"></div>
+        <div class="section-head"><h2 class="section-title">02 / 設定風格</h2><span class="tiny">自動套用配色</span></div>
+        <div class="field-title">視覺氛圍</div>
+        <div class="segmented" role="group" aria-label="視覺氛圍">
+          <button class="active" data-mood="soft" aria-pressed="true" type="button">柔和</button><button data-mood="vivid" aria-pressed="false" type="button">鮮明</button>
+        </div>
+        <label class="toggle-row" for="usePhoto"><span><b style="font-size:13px">融入原圖元素</b><small>將主視覺局部融合進背景</small></span><input id="usePhoto" class="switch" type="checkbox" checked></label>
+        <button id="generateBtn" class="action-main" type="button" disabled><span aria-hidden="true">✦</span> 重新變換四款構圖</button>
+        <div class="status" id="status" role="status" aria-live="polite">上傳一張圖片，開始你的簡報設計。</div>
+      </aside>
+      <div class="right-pane">
+        <section class="panel palette-panel" aria-labelledby="paletteTitle">
+          <div class="section-head" style="margin-bottom:4px"><h2 class="section-title" id="paletteTitle">03 / 主視覺配色</h2><span class="tiny">6 COLORS</span></div>
+          <p class="section-sub">點一下色票就能複製 HEX 色碼。顏色從上傳圖片取樣。</p>
+          <div class="palette" id="palette" aria-label="自動擷取色票"></div>
+          <div class="palette-bottom"><span class="credit" id="paletteHint">目前顯示示範配色；上傳後會自動更新。</span><button class="soft-btn" type="button" id="copyAll" disabled>⧉ 複製全部色碼</button></div>
+        </section>
+        <section aria-labelledby="galleryTitle">
+          <div class="gallery-heading"><div><h2 id="galleryTitle">04 / 四款簡報底圖</h2><p>不包含文字，可直接加入你的標題與內容。</p></div><span class="tiny" style="white-space:nowrap">16:9 &nbsp;/&nbsp; 1920×1080</span></div>
+          <div class="gallery" id="gallery">
+            <article class="template"><div class="template-visual"><canvas width="720" height="405" id="preview0" aria-label="封面型簡報底圖預覽" role="img"></canvas></div><div class="template-foot"><div><h3>01 / 封面型</h3><small>大標題、主題介紹</small></div><button class="download" data-template="0" disabled type="button">↓ PNG</button></div></article>
+            <article class="template"><div class="template-visual"><canvas width="720" height="405" id="preview1" aria-label="內容型簡報底圖預覽" role="img"></canvas></div><div class="template-foot"><div><h3>02 / 內容型</h3><small>清晰留白、重點條列</small></div><button class="download" data-template="1" disabled type="button">↓ PNG</button></div></article>
+            <article class="template"><div class="template-visual"><canvas width="720" height="405" id="preview2" aria-label="圖文型簡報底圖預覽" role="img"></canvas></div><div class="template-foot"><div><h3>03 / 圖文型</h3><small>圖片與說明並排</small></div><button class="download" data-template="2" disabled type="button">↓ PNG</button></div></article>
+            <article class="template"><div class="template-visual"><canvas width="720" height="405" id="preview3" aria-label="結尾型簡報底圖預覽" role="img"></canvas></div><div class="template-foot"><div><h3>04 / 結尾型</h3><small>總結、感謝與收尾</small></div><button class="download" data-template="3" disabled type="button">↓ PNG</button></div></article>
+          </div>
+          <div class="hint-box"><b>💡 使用小提醒</b>　匯入 Canva、PowerPoint 或 Google Slides 後，將圖片設為背景，再加上文字即可。建議主要內容放在版面留白處，避免蓋住視覺重點。<br><span style="font-size:11px">本工具使用取色與 Canvas 排版演算法，不是雲端 AI 圖像生成；它會延伸圖片的色彩和構圖元素，而非重繪照片中的物件。</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <footer class="wrap footer"><span>© 2026 Slide Studio · Personal Creative Tool</span><a href="index.html" style="text-decoration:underline">返回個人首頁</a></footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+  'use strict';
+  // 本機 Canvas 取色與排版：不傳送使用者圖片到伺服器。
+  const $ = s => document.querySelector(s);
+  const fileInput=$('#fileInput'), dropZone=$('#dropZone'), sourcePreview=$('#sourcePreview');
+  const defaultColors=['#E57B58','#3E5666','#D7B69E','#F2E4D6','#758A84','#242A32'];
+  const labels=['主色','輔助','亮點','延伸','延伸','深色'];
+  const state={image:null,url:null,colors:[...defaultColors],mood:'soft',includePhoto:true,seed:0,loaded:false};
+  let toastTimer;
+  const escapeHtml=s=>String(s).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+  function toast(message){const t=$('#toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
+  const rgb=hex=>{let h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]};
+  const hex=arr=>'#'+arr.map(x=>Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0')).join('').toUpperCase();
+  const mix=(a,b,p)=>hex(rgb(a).map((x,i)=>x*(1-p)+rgb(b)[i]*p));
+  const luma=h=>rgb(h).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0)/255;
+  const dist=(a,b)=>a.reduce((s,v,i)=>s+(v-b[i])**2,0);
+  function renderPalette(){
+    $('#palette').innerHTML='';
+    state.colors.forEach((c,i)=>{const b=document.createElement('button');b.className='swatch';b.type='button';b.title='複製 '+c;b.innerHTML=`<span class="swatch-color" style="--swatch:${escapeHtml(c)}"></span><span class="swatch-code">${escapeHtml(c)}</span><span class="swatch-label">${labels[i]}</span>`;b.addEventListener('click',()=>copyText(c,'已複製 '+c));$('#palette').appendChild(b)});
+  }
+  async function copyText(text,msg){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text)}else{const area=document.createElement('textarea');area.value=text;area.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(area);area.select();if(!document.execCommand('copy'))throw Error('copy failed');area.remove()}toast(msg)}catch{toast('無法自動複製，請手動選取色碼')}}
+  $('#copyAll').addEventListener('click',()=>copyText(state.colors.join('  '),'已複製全部六組色碼'));
+  function generatePalette(img){
+    const c=document.createElement('canvas');const maxDim=240;const ratio=Math.min(maxDim/img.naturalWidth,maxDim/img.naturalHeight,1);c.width=Math.max(1,Math.round(img.naturalWidth*ratio));c.height=Math.max(1,Math.round(img.naturalHeight*ratio));
+    const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,c.width,c.height);
+    const pixels=x.getImageData(0,0,c.width,c.height).data;const histogram=new Map();
+    for(let i=0;i<pixels.length;i+=4*3){if(pixels[i+3]<160)continue;const r=pixels[i]>>3,g=pixels[i+1]>>3,b=pixels[i+2]>>3,key=(r<<10)|(g<<5)|b;histogram.set(key,(histogram.get(key)||0)+1)}
+    const bins=[...histogram.entries()].map(([k,n])=>({c:[((k>>10)&31)*8+4,((k>>5)&31)*8+4,(k&31)*8+4],n})).sort((a,b)=>b.n-a.n);
+    if(!bins.length) return [...defaultColors];
+    // 頻率高且具有色差的種子，可避免只取到一堆相近的灰色。
+    let centers=[bins[0].c.slice()];
+    while(centers.length<6){let best=null,score=-1;for(const v of bins){const d=Math.min(...centers.map(c=>dist(c,v.c)));const s=d*Math.pow(v.n,.6);if(d>100&&s>score){best=v;score=s}}if(!best)break;centers.push(best.c.slice())}
+    while(centers.length<6)centers.push(rgb(mix(hex(centers[centers.length-1]),centers.length%2?'#FFFFFF':'#101820',.32)));
+    let sums,counts;
+    for(let t=0;t<11;t++){sums=centers.map(()=>[0,0,0]);counts=centers.map(()=>0);for(const b of bins){let best=0,score=Infinity;for(let j=0;j<6;j++){const d=dist(b.c,centers[j]);if(d<score){score=d;best=j}}for(let k=0;k<3;k++)sums[best][k]+=b.c[k]*b.n;counts[best]+=b.n}centers=centers.map((c,i)=>counts[i]>0?sums[i].map(z=>z/counts[i]):c)}
+    const colors=centers.map((c,i)=>({hex:hex(c),weight:counts[i]})).sort((a,b)=>b.weight-a.weight);
+    const unique=[];for(const c of colors){if(!unique.some(other=>dist(rgb(other),rgb(c.hex))<225))unique.push(c.hex)}
+    while(unique.length<6){const source=unique[Math.max(0,(unique.length-1)%unique.length)]||'#E57B58';const tint=mix(source,unique.length%2?'#FFFFFF':'#182028',.23+(unique.length%3)*.1);if(!unique.includes(tint))unique.push(tint);else unique.push(defaultColors[unique.length])}
+    return unique.slice(0,6);
+  }
+  function rounded(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
+  function fillRect(ctx,x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h)}
+  function linear(ctx,x,y,x2,y2,a,b){const grad=ctx.createLinearGradient(x,y,x2,y2);grad.addColorStop(0,a);grad.addColorStop(1,b);return grad}
+  function circle(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+  function drawPhoto(ctx,x,y,w,h,alpha=1,radius=0){if(!state.image||!state.includePhoto)return false;const img=state.image,iw=img.naturalWidth,ih=img.naturalHeight;const scale=Math.max(w/iw,h/ih),dw=iw*scale,dh=ih*scale;ctx.save();ctx.globalAlpha=alpha;rounded(ctx,x,y,w,h,radius);ctx.clip();ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh);ctx.restore();return true}
+  function photoGlow(ctx,c,w,h){if(state.includePhoto&&state.image){ctx.save();ctx.filter='blur(105px)';drawPhoto(ctx,-150,-130,w+300,h+260,.42);ctx.restore()}else{const g=ctx.createRadialGradient(w*.8,h*.3,100,w*.8,h*.3,h);g.addColorStop(0,c[2]+'88');g.addColorStop(1,'transparent');fillRect(ctx,0,0,w,h,g)}}
+  function art(ctx,kind){
+    const C=state.colors;const soft=state.mood==='soft';const dark=C.reduce((p,c)=>luma(c)<luma(p)?c:p,C[0]);const light=C.reduce((p,c)=>luma(c)>luma(p)?c:p,C[0]);const accent=C[0];const p1=C[1],p2=C[2],p3=C[3];const s=state.seed;const shift=(s%5)*34;
+    if(kind===0){ // 封面：左側清楚的標題空間
+      fillRect(ctx,0,0,1920,1080,linear(ctx,0,0,1920,950,mix(dark,'#10141B',.5),mix(p1,dark,.55)));
+      circle(ctx,1505+shift,260,580,p2+'28');circle(ctx,1720,970,370,accent+'33');
+      if(!drawPhoto(ctx,1030+shift/3,122,770,835,soft?.8:.93,55)){
+        fillRect(ctx,1060,120,730,835,linear(ctx,1060,180,1770,880,accent,p1));circle(ctx,1420,470,270,p3+'77');circle(ctx,1670,760,240,dark+'77')
+      }
+      fillRect(ctx,1060+shift/3,122,24,835,accent+'B8');
+      fillRect(ctx,135,138,205,12,accent);fillRect(ctx,135,886,440,3,'#FFFFFF44');circle(ctx,142,948,13,accent);
+      if(soft)fillRect(ctx,1030+shift/3,122,770,835,'#FFFFFF0C');
+    }else if(kind===1){ // 內容：大量留白
+      const bg=mix(light,'#FFFFFF',soft?.9:.8);fillRect(ctx,0,0,1920,1080,bg);
+      fillRect(ctx,0,0,1920,21,accent);fillRect(ctx,110,120,3,760,mix(dark,bg,.5));
+      ctx.save();ctx.beginPath();ctx.arc(1630+shift/3,245,278,0,Math.PI*2);ctx.clip();
+      if(!drawPhoto(ctx,1310+shift/3,-100,650,650,soft?.36:.62)){circle(ctx,1650,220,270,p1+'BB');circle(ctx,1570,200,180,accent+'88')}
+      ctx.restore();circle(ctx,1710,980,280,accent+(soft?'18':'32'));
+      fillRect(ctx,1380,944,420,5,mix(accent,bg,.45));fillRect(ctx,110,943,410,3,mix(dark,bg,.68));
+    }else if(kind===2){ // 圖文：左圖右側放文字
+      const bg=mix(light,'#FFFFFF',soft?.85:.68);fillRect(ctx,0,0,1920,1080,bg);
+      if(!drawPhoto(ctx,0,0,835+shift/2,1080,.95)){fillRect(ctx,0,0,850,1080,linear(ctx,0,0,800,1080,p1,accent));circle(ctx,420,450,400,p2+'89')}
+      fillRect(ctx,830+shift/2,0,14,1080,accent);
+      fillRect(ctx,1005,114,250,13,accent);circle(ctx,1775,155,64,p1+'28');
+      fillRect(ctx,1010,947,790,3,mix(dark,bg,.67));
+      ctx.save();ctx.strokeStyle=accent+'55';ctx.lineWidth=3;ctx.strokeRect(955,65,890,940);ctx.restore();
+    }else{ // 結尾：深色沉浸式
+      fillRect(ctx,0,0,1920,1080,linear(ctx,0,0,1700,900,mix(dark,'#13151A',.5),mix(p1,'#181E24',.65)));
+      photoGlow(ctx,C,1920,1080);fillRect(ctx,0,0,1920,1080,soft?'#080A1099':'#05071088');
+      ctx.save();ctx.beginPath();ctx.arc(1455-shift/2,535,370,0,Math.PI*2);ctx.clip();
+      if(!drawPhoto(ctx,1075-shift/2,150,760,760,.82)){circle(ctx,1470,550,390,accent);circle(ctx,1600,700,300,p1+'88')}
+      ctx.restore();ctx.strokeStyle=p3+'A5';ctx.lineWidth=4;ctx.beginPath();ctx.arc(1455-shift/2,535,393,0,Math.PI*2);ctx.stroke();
+      fillRect(ctx,150,138,230,12,accent);fillRect(ctx,150,905,800,3,'#FFFFFF88');circle(ctx,165,966,15,p2);
+    }
+    // 避免截圖出現任何預先寫死的文字：此圖片可以自由添加簡報標題。
+  }
+  function drawTemplate(ctx,index,w,h){ctx.save();ctx.setTransform(w/1920,0,0,h/1080,0,0);ctx.clearRect(0,0,1920,1080);art(ctx,index);ctx.restore()}
+  function renderPreviews(){for(let i=0;i<4;i++){const c=document.getElementById('preview'+i);drawTemplate(c.getContext('2d'),i,c.width,c.height)}}
+  async function onImage(file){
+    if(!file)return;
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)){toast('請選擇 JPG、PNG 或 WEBP 圖片');return}
+    if(file.size>15*1024*1024){toast('圖片超過 15 MB，請先壓縮後再試');return}
+    $('#status').textContent='正在分析圖片顏色…';
+    const url=URL.createObjectURL(file),img=new Image();
+    img.onload=()=>{if(state.url)URL.revokeObjectURL(state.url);state.url=url;state.image=img;state.seed=0;state.loaded=true;state.colors=generatePalette(img);sourcePreview.src=url;$('#sourceName').textContent=file.name+' · '+img.naturalWidth+' × '+img.naturalHeight;dropZone.classList.add('has-image');$('#paletteHint').textContent='已從你的主視覺取樣六組配色。';$('#generateBtn').disabled=false;$('#copyAll').disabled=false;document.querySelectorAll('.download').forEach(b=>b.disabled=false);renderPalette();renderPreviews();$('#status').textContent='完成！可以複製色碼，或下載四款底圖。';toast('主視覺解析完成，四款底圖已更新')};
+    img.onerror=()=>{URL.revokeObjectURL(url);$('#status').textContent='無法開啟圖片，請換一張試試。';toast('圖片格式可能不支援，請換一張圖片')};
+    img.src=url;
+  }
+  $('#chooseBtn').addEventListener('click',()=>fileInput.click());$('#replaceBtn').addEventListener('click',()=>fileInput.click());
+  fileInput.addEventListener('change',e=>{onImage(e.target.files?.[0]);fileInput.value=''});
+  ['dragenter','dragover'].forEach(evt=>dropZone.addEventListener(evt,e=>{e.preventDefault();e.stopPropagation();dropZone.classList.add('dragover')}));
+  ['dragleave','drop'].forEach(evt=>dropZone.addEventListener(evt,e=>{e.preventDefault();e.stopPropagation();dropZone.classList.remove('dragover')}));
+  dropZone.addEventListener('drop',e=>onImage([...e.dataTransfer.files].find(f=>f.type.startsWith('image/'))||e.dataTransfer.files[0]));
+  document.querySelectorAll('[data-mood]').forEach(btn=>btn.addEventListener('click',()=>{state.mood=btn.dataset.mood;document.querySelectorAll('[data-mood]').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-pressed',b===btn?'true':'false')});renderPreviews()}));
+  $('#usePhoto').addEventListener('change',e=>{state.includePhoto=e.target.checked;renderPreviews()});
+  $('#generateBtn').addEventListener('click',()=>{state.seed+=1;renderPreviews();toast('已變換四款構圖')});
+  async function downloadTemplate(i){if(!state.loaded)return;const c=document.createElement('canvas');c.width=1920;c.height=1080;drawTemplate(c.getContext('2d'),i,1920,1080);const name=['cover','content','image-text','ending'][i];const fileName=`slide-bg-${name}.png`;try{const blob=await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(Error('產生失敗')),'image/png'));const u=URL.createObjectURL(blob);const link=document.createElement('a');link.href=u;link.download=fileName;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(u),10000);toast('正在下載 '+fileName)}catch(err){console.error(err);toast('下載失敗，請使用其他瀏覽器試試')}}
+  document.querySelectorAll('[data-template]').forEach(b=>b.addEventListener('click',()=>downloadTemplate(Number(b.dataset.template))));
+  renderPalette();renderPreviews();
+  </script>
+</body>
+</html>
