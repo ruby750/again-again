@@ -183,7 +183,7 @@
           <h1 id="hero-title">今天<br>吃<em>什麼？</em></h1>
           <p class="tagline">每天都要吃飯，卻每天都不知道吃什麼。<br>看看今天的天氣，再選一下心情，<br>讓我幫你挑最適合現在的一餐！</p>
         </div>
-        <div class="hero-art" aria-hidden="true"><div class="circle-art"><span>🍜</span></div><span class="art-sticker">選擇困難救星 ✦</span><span class="art-scribble">NO MORE “隨便” !</span></div>
+        <div class="hero-art" aria-hidden="true"><div class="circle-art"><span>🍜</span></div><span class="art-sticker">超過 100 種餐點 ✦</span><span class="art-scribble">NO MORE “隨便” !</span></div>
       </section>
 
       <section class="weather-card" aria-labelledby="weatherHeading">
@@ -291,7 +291,8 @@
   </div>
   <script>
   'use strict';
-  // 可以在這裡自行新增菜色：id 不可重複；meal 支援 breakfast/lunch/dinner/late。
+  // 菜單：共 131 道。新增餐點時 id 必須唯一；meal 支援 breakfast/lunch/dinner/late。
+  // 2026 擴充菜色使用 tags 陣列（warm/soup/fresh/light/comfort/quick/treat/bold），供天氣與心情推薦加權。
   const meals = [
     {id:'eggroll',name:'蛋餅配豆漿',emoji:'🥚',min:45,max:95,meal:['breakfast'],type:'snack',veg:true,reason:'經典早餐組合，簡單又有幸福感。'},
     {id:'riceball',name:'古早味飯糰',emoji:'🍙',min:40,max:85,meal:['breakfast'],type:'rice',veg:false,reason:'拿著就能吃，忙碌早晨的好朋友。'},
@@ -343,7 +344,88 @@
     {id:'fishbento',name:'烤鯖魚定食',emoji:'🐟',min:220,max:345,meal:['lunch','dinner'],type:'rice',veg:false,reason:'配上熱飯與配菜，吃一頓舒服的定食。'},
     {id:'congee',name:'吻仔魚粥',emoji:'🥣',min:120,max:195,meal:['lunch','dinner','late'],type:'rice',veg:false,reason:'溫潤的粥，適合今天想吃簡單一點。'},
     {id:'pumpkin',name:'南瓜濃湯與麵包',emoji:'🥣',min:115,max:185,meal:['breakfast','lunch','dinner'],type:'light',veg:true,reason:'暖暖的濃湯配麵包，輕柔地填飽肚子。'},
-    {id:'toastpizza',name:'起司披薩吐司',emoji:'🍕',min:65,max:95,meal:['breakfast','late'],type:'world',veg:true,reason:'簡單的起司番茄組合，也有小小儀式感。'}
+    {id:'toastpizza',name:'起司披薩吐司',emoji:'🍕',min:65,max:95,meal:['breakfast','late'],type:'world',veg:true,reason:'簡單的起司番茄組合，也有小小儀式感。'},
+    // 2026 年擴充：台灣常見餐點與各國料理（每道均具備天氣／心情標籤）。
+    {"id":"porkchopbento","name":"香酥排骨便當","emoji":"🍱","min":110,"max":175,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"香酥排骨配上熱飯，今天想吃飽就選這個。","tags":["warm","comfort","quick"]},
+    {"id":"braisedchicken","name":"滷雞腿便當","emoji":"🍱","min":115,"max":185,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"鹹香滷雞腿配上幾樣配菜，很有家常感。","tags":["warm","comfort","quick"]},
+    {"id":"chickenrice","name":"雞肉飯套餐","emoji":"🍚","min":80,"max":155,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"香嫩雞絲和雞油飯，簡單卻很經典。","tags":["warm","comfort","quick"]},
+    {"id":"turkeyrice","name":"嘉義火雞肉飯","emoji":"🍚","min":65,"max":135,"meal":["lunch","dinner","late"],"type":"rice","veg":false,"reason":"細嫩火雞肉配香噴噴白飯，讓人一口接一口。","tags":["warm","comfort","quick"]},
+    {"id":"porkbellyrice","name":"控肉飯","emoji":"🍖","min":100,"max":180,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"肥瘦相間的控肉，今天就吃點滿足的。","tags":["warm","comfort"]},
+    {"id":"mincedporkrice","name":"瓜仔肉燥飯","emoji":"🍚","min":70,"max":135,"meal":["lunch","dinner","late"],"type":"rice","veg":false,"reason":"瓜仔香氣融入肉燥，配白飯剛剛好。","tags":["warm","comfort","quick"]},
+    {"id":"threecup","name":"三杯雞飯","emoji":"🍱","min":135,"max":230,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"九層塔香氣十足，很適合想吃下飯料理的日子。","tags":["warm","comfort","bold"]},
+    {"id":"beefstewrice","name":"牛肉燴飯","emoji":"🍛","min":145,"max":245,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"濃郁醬汁淋上飯，一盤就很有飽足感。","tags":["warm","comfort"]},
+    {"id":"chickendon","name":"日式親子丼","emoji":"🍚","min":145,"max":245,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"滑嫩雞蛋和雞肉蓋飯，口味溫柔又滿足。","tags":["warm","comfort"]},
+    {"id":"tonkatsudon","name":"日式豬排丼","emoji":"🍛","min":180,"max":300,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"酥脆豬排配熱飯，今天想犒賞自己一下。","tags":["warm","treat"]},
+    {"id":"salmonbowl","name":"炙燒鮭魚丼飯","emoji":"🍣","min":270,"max":450,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"油脂香氣和醋飯很搭，來一份有儀式感的料理。","tags":["treat","fresh"]},
+    {"id":"unagirice","name":"蒲燒鰻魚飯","emoji":"🍱","min":350,"max":600,"meal":["lunch","dinner"],"type":"rice","veg":false,"reason":"甘甜醬汁配香烤鰻魚，是值得慢慢享用的一餐。","tags":["warm","treat"]},
+    {"id":"mushroomrice","name":"香菇燴飯","emoji":"🍄","min":105,"max":195,"meal":["lunch","dinner"],"type":"rice","veg":true,"reason":"香菇醬汁拌著白飯，溫暖又有飽足感。","tags":["warm","comfort"]},
+    {"id":"tofurice","name":"香煎豆腐蔬食飯","emoji":"🍱","min":130,"max":220,"meal":["lunch","dinner"],"type":"rice","veg":true,"reason":"豆腐搭配多種蔬菜，吃起來清爽又滿足。","tags":["warm","light"]},
+    {"id":"taro_porridge","name":"芋頭鹹粥","emoji":"🥣","min":90,"max":160,"meal":["breakfast","lunch","late"],"type":"rice","veg":false,"reason":"芋頭香氣和熱粥很搭，微涼的日子很適合。","tags":["warm","soup","comfort"]},
+    {"id":"shrimprice","name":"蝦仁蛋炒飯","emoji":"🍤","min":105,"max":195,"meal":["lunch","dinner","late"],"type":"rice","veg":false,"reason":"鑊氣、雞蛋和鮮蝦，一盤就很有滋味。","tags":["warm","quick"]},
+    {"id":"yangchun","name":"陽春麵","emoji":"🍜","min":55,"max":105,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"清爽的熱湯與細麵，最熟悉的家常味。","tags":["warm","soup","comfort","quick"]},
+    {"id":"zhajiang","name":"炸醬麵","emoji":"🍝","min":85,"max":165,"meal":["lunch","dinner"],"type":"noodle","veg":false,"reason":"濃郁炸醬拌麵，鹹香口味讓人滿足。","tags":["warm","comfort"]},
+    {"id":"wontonnoodle","name":"鮮肉餛飩麵","emoji":"🍜","min":95,"max":170,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"餛飩配上熱湯麵，吃一碗身心都暖起來。","tags":["warm","soup","comfort"]},
+    {"id":"beefdrynoodle","name":"牛肉乾拌麵","emoji":"🍜","min":150,"max":250,"meal":["lunch","dinner"],"type":"noodle","veg":false,"reason":"香濃牛肉醬汁裹住麵條，風味十足。","tags":["warm","comfort","bold"]},
+    {"id":"sourspicy","name":"酸辣湯麵","emoji":"🥣","min":95,"max":175,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"酸酸辣辣的湯頭，想換口味就吃它。","tags":["warm","soup","bold"]},
+    {"id":"coldnoodle","name":"麻醬涼麵","emoji":"🍜","min":70,"max":135,"meal":["breakfast","lunch","dinner","late"],"type":"noodle","veg":true,"reason":"爽口的涼麵配香濃麻醬，熱天很合適。","tags":["fresh","light","quick"]},
+    {"id":"danzai","name":"台南擔仔麵","emoji":"🍜","min":65,"max":130,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"小巧一碗卻香氣滿滿，來點台南味。","tags":["warm","soup","comfort"]},
+    {"id":"lamb_stirnoodle","name":"羊肉炒麵","emoji":"🍝","min":125,"max":215,"meal":["lunch","dinner"],"type":"noodle","veg":false,"reason":"沙茶香氣配大火快炒，今天來點重口味。","tags":["warm","bold"]},
+    {"id":"seafoodudon","name":"海鮮烏龍麵","emoji":"🍲","min":180,"max":300,"meal":["lunch","dinner"],"type":"noodle","veg":false,"reason":"鮮甜海味加上滑順烏龍麵，舒服又豐盛。","tags":["warm","soup","treat"]},
+    {"id":"vegtomatosoup","name":"番茄蔬菜湯麵","emoji":"🍅","min":105,"max":190,"meal":["lunch","dinner"],"type":"noodle","veg":true,"reason":"番茄酸甜湯底和蔬菜，讓這一餐暖暖的。","tags":["warm","soup","comfort","light"]},
+    {"id":"sichuan_rice_noodle","name":"麻辣牛肉米線","emoji":"🌶️","min":165,"max":280,"meal":["lunch","dinner"],"type":"noodle","veg":false,"reason":"米線吸滿香麻湯汁，想吃刺激一點就選它。","tags":["warm","soup","bold","treat"]},
+    {"id":"duckvermicelli","name":"鴨肉冬粉","emoji":"🍜","min":95,"max":175,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"鴨肉香氣融入湯裡，吃得暖心又飽足。","tags":["warm","soup","comfort"]},
+    {"id":"stirfryricevermicelli","name":"台式炒米粉","emoji":"🍝","min":75,"max":145,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"米粉吸滿香氣，懷舊的小吃口味。","tags":["warm","quick","comfort"]},
+    {"id":"vegetablesoba","name":"蔬菜蕎麥麵","emoji":"🥢","min":150,"max":250,"meal":["lunch","dinner"],"type":"noodle","veg":true,"reason":"清爽蕎麥麵配蔬菜，想吃輕盈口味就選它。","tags":["fresh","light"]},
+    {"id":"chickennoodle","name":"香菇雞絲麵","emoji":"🍜","min":95,"max":170,"meal":["lunch","dinner","late"],"type":"noodle","veg":false,"reason":"熱湯裡有雞絲和香菇，簡單卻很療癒。","tags":["warm","soup","comfort"]},
+    {"id":"tomyumseafood","name":"冬蔭功海鮮麵","emoji":"🍜","min":195,"max":330,"meal":["lunch","dinner"],"type":"noodle","veg":false,"reason":"酸辣香料和海鮮很搭，今天換個南洋口味。","tags":["warm","soup","bold","treat"]},
+    {"id":"fruit_yogurt","name":"水果優格碗","emoji":"🍓","min":100,"max":190,"meal":["breakfast","lunch"],"type":"light","veg":true,"reason":"水果配上優格，今天從清爽的一餐開始。","tags":["fresh","light","quick"]},
+    {"id":"oatmeal","name":"香蕉燕麥粥","emoji":"🥣","min":65,"max":125,"meal":["breakfast"],"type":"light","veg":true,"reason":"溫熱燕麥和香蕉甜香，早上吃很剛好。","tags":["warm","comfort","quick"]},
+    {"id":"sweetpotato_soy","name":"烤地瓜配豆漿","emoji":"🍠","min":55,"max":115,"meal":["breakfast","late"],"type":"light","veg":true,"reason":"地瓜天然甜味配豆漿，簡單又滿足。","tags":["warm","light","quick"]},
+    {"id":"egg_bagel","name":"起司蛋貝果","emoji":"🥯","min":95,"max":175,"meal":["breakfast","lunch"],"type":"light","veg":true,"reason":"紮實貝果加上起司蛋，早午餐都適合。","tags":["warm","quick"]},
+    {"id":"tuna_toast","name":"鮪魚蛋吐司","emoji":"🥪","min":65,"max":120,"meal":["breakfast","lunch"],"type":"light","veg":false,"reason":"鮪魚蛋餡夾進烤吐司，方便帶著走。","tags":["quick","comfort"]},
+    {"id":"peanut_toast","name":"花生厚片吐司","emoji":"🍞","min":40,"max":85,"meal":["breakfast","late"],"type":"light","veg":true,"reason":"厚片吐司配花生香氣，簡單又幸福。","tags":["quick","comfort"]},
+    {"id":"french_toast","name":"法式吐司","emoji":"🍞","min":80,"max":165,"meal":["breakfast","lunch"],"type":"light","veg":true,"reason":"金黃吐司與淡淡奶香，適合悠閒吃早餐。","tags":["warm","treat","comfort"]},
+    {"id":"corn_egg_sandwich","name":"玉米蛋三明治","emoji":"🥪","min":50,"max":110,"meal":["breakfast","lunch"],"type":"light","veg":true,"reason":"柔軟吐司夾著玉米蛋，清爽又方便。","tags":["quick","light"]},
+    {"id":"smoked_salmon_bagel","name":"煙燻鮭魚貝果","emoji":"🥯","min":160,"max":280,"meal":["breakfast","lunch"],"type":"light","veg":false,"reason":"鮭魚與貝果的搭配，適合想吃精緻一點。","tags":["fresh","light","treat"]},
+    {"id":"chicken_caesar","name":"雞肉凱薩沙拉","emoji":"🥗","min":165,"max":280,"meal":["lunch","dinner"],"type":"light","veg":false,"reason":"香煎雞肉配爽脆生菜，吃起來很有層次。","tags":["fresh","light"]},
+    {"id":"tuna_sub","name":"鮪魚潛艇堡","emoji":"🥖","min":125,"max":210,"meal":["lunch","dinner"],"type":"light","veg":false,"reason":"麵包夾滿鮪魚和蔬菜，方便又飽足。","tags":["fresh","quick"]},
+    {"id":"vegetarian_focaccia","name":"香烤蔬菜佛卡夏","emoji":"🥖","min":145,"max":245,"meal":["lunch","dinner"],"type":"light","veg":true,"reason":"香草烤蔬菜夾佛卡夏，香氣十足。","tags":["fresh","light"]},
+    {"id":"sweetpotato_bowl","name":"地瓜藜麥沙拉碗","emoji":"🥗","min":155,"max":270,"meal":["lunch","dinner"],"type":"light","veg":true,"reason":"地瓜加上穀物與蔬菜，清爽卻有飽足感。","tags":["fresh","light"]},
+    {"id":"chicken_wrap","name":"香草雞肉捲餅","emoji":"🌯","min":140,"max":245,"meal":["lunch","dinner"],"type":"light","veg":false,"reason":"雞肉和生菜包在餅皮裡，方便又美味。","tags":["fresh","quick"]},
+    {"id":"veg_springroll","name":"越式蔬菜春捲","emoji":"🥬","min":115,"max":200,"meal":["lunch","dinner"],"type":"light","veg":true,"reason":"清脆蔬菜配米紙，適合熱天想吃清爽一點。","tags":["fresh","light"]},
+    {"id":"egg_salad_wrap","name":"蛋沙拉捲餅","emoji":"🌯","min":95,"max":175,"meal":["breakfast","lunch"],"type":"light","veg":true,"reason":"滑順蛋沙拉裹在餅皮裡，簡單也很好吃。","tags":["fresh","quick"]},
+    {"id":"hainan_chicken","name":"海南雞飯","emoji":"🍗","min":170,"max":280,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"嫩雞肉與香氣十足的飯，今天來點南洋味。","tags":["comfort","treat"]},
+    {"id":"green_curry_chicken","name":"泰式綠咖哩雞飯","emoji":"🍛","min":195,"max":330,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"椰香綠咖哩帶點辣，吃點不一樣的。","tags":["warm","bold","treat"]},
+    {"id":"thai_basil_beef","name":"泰式打拋牛肉飯","emoji":"🌶️","min":180,"max":300,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"九層塔和香料很下飯，適合重口味的一天。","tags":["warm","bold"]},
+    {"id":"butter_chicken","name":"印度奶油雞肉咖哩","emoji":"🍛","min":240,"max":390,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"濃郁滑順的咖哩配米飯，好好享受這一餐。","tags":["warm","comfort","treat"]},
+    {"id":"lentil_curry","name":"印度扁豆咖哩飯","emoji":"🍛","min":185,"max":315,"meal":["lunch","dinner"],"type":"world","veg":true,"reason":"豆香與香料融合，素食也能吃得很滿足。","tags":["warm","comfort","bold"]},
+    {"id":"shrimp_pasta","name":"蒜香鮮蝦義大利麵","emoji":"🍝","min":230,"max":390,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"蒜香和鮮蝦配義大利麵，簡單又有儀式感。","tags":["warm","treat"]},
+    {"id":"pesto_chicken_pasta","name":"青醬雞肉義大利麵","emoji":"🍝","min":200,"max":340,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"羅勒青醬香氣濃郁，適合今天想犒賞自己。","tags":["warm","comfort","treat"]},
+    {"id":"seafood_paella","name":"西班牙海鮮燉飯","emoji":"🥘","min":280,"max":460,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"海鮮香氣融入米飯，想吃特別一點就選它。","tags":["warm","treat"]},
+    {"id":"veg_taco","name":"墨西哥蔬菜塔可","emoji":"🌮","min":150,"max":265,"meal":["lunch","dinner"],"type":"world","veg":true,"reason":"香料蔬菜配上脆口餅皮，味道很有活力。","tags":["fresh","bold","treat"]},
+    {"id":"chicken_quesadilla","name":"雞肉起司薄餅","emoji":"🫓","min":190,"max":325,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"融化的起司與雞肉，是令人滿足的組合。","tags":["warm","treat"]},
+    {"id":"kimchi_pork_rice","name":"韓式泡菜豬肉炒飯","emoji":"🍚","min":160,"max":275,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"泡菜酸香和熱炒豬肉，吃起來很開胃。","tags":["warm","bold"]},
+    {"id":"korean_fried_chicken","name":"韓式炸雞飯","emoji":"🍗","min":200,"max":330,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"甜辣炸雞配白飯，今天吃得有點過癮。","tags":["warm","treat","bold"]},
+    {"id":"japanese_omurice","name":"日式雞肉蛋包飯","emoji":"🍳","min":175,"max":290,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"滑嫩蛋皮包住炒飯，有種被療癒的感覺。","tags":["warm","comfort","treat"]},
+    {"id":"cheese_potato","name":"起司焗烤馬鈴薯","emoji":"🥔","min":155,"max":270,"meal":["lunch","dinner"],"type":"world","veg":true,"reason":"香濃起司裹著馬鈴薯，吃一口就很滿足。","tags":["warm","comfort"]},
+    {"id":"yakitori_set","name":"日式烤雞肉串定食","emoji":"🍢","min":245,"max":390,"meal":["lunch","dinner"],"type":"world","veg":false,"reason":"炭烤香氣搭配米飯和配菜，適合慢慢品嚐。","tags":["warm","treat"]},
+    {"id":"miso_veghotpot","name":"昆布蔬菜豆腐鍋","emoji":"🍲","min":195,"max":310,"meal":["lunch","dinner"],"type":"world","veg":true,"reason":"昆布湯底配豆腐蔬菜，想吃暖呼呼又清爽的就選它。","tags":["warm","soup","comfort"]},
+    {"id":"salty_soymilk","name":"鹹豆漿","emoji":"🥣","min":35,"max":75,"meal":["breakfast"],"type":"snack","veg":false,"reason":"鹹香豆漿暖胃，早上來一碗很有台灣味。","tags":["warm","soup","quick"]},
+    {"id":"shaobing_youtiao","name":"燒餅油條","emoji":"🫓","min":45,"max":95,"meal":["breakfast"],"type":"snack","veg":true,"reason":"酥脆燒餅夾油條，是經典台式早餐。","tags":["warm","quick","comfort"]},
+    {"id":"veggie_riceball","name":"蔬食飯糰","emoji":"🍙","min":50,"max":100,"meal":["breakfast","lunch"],"type":"snack","veg":true,"reason":"香Q飯糰加蔬菜餡料，方便帶著走。","tags":["quick","light"]},
+    {"id":"meat_bao","name":"鮮肉包","emoji":"🥟","min":35,"max":85,"meal":["breakfast","late"],"type":"snack","veg":false,"reason":"熱騰騰的包子，早上或夜裡都很適合。","tags":["warm","quick","comfort"]},
+    {"id":"corn_egg_pancake","name":"玉米蛋餅","emoji":"🥚","min":45,"max":95,"meal":["breakfast","late"],"type":"snack","veg":true,"reason":"蛋餅裡多了甜甜玉米，怎麼吃都不膩。","tags":["warm","quick"]},
+    {"id":"pork_sticky_rice","name":"台式肉粽","emoji":"🍙","min":60,"max":125,"meal":["breakfast","lunch","late"],"type":"snack","veg":false,"reason":"糯米和鹹香餡料，吃一顆就很有飽足感。","tags":["warm","comfort"]},
+    {"id":"pork_ballsoup","name":"貢丸湯配米粉","emoji":"🥣","min":85,"max":150,"meal":["lunch","dinner","late"],"type":"snack","veg":false,"reason":"貢丸湯配上米粉，暖胃又有飽足感。","tags":["warm","soup","comfort"]},
+    {"id":"grilled_sausage","name":"大腸包小腸","emoji":"🌭","min":65,"max":125,"meal":["dinner","late"],"type":"snack","veg":false,"reason":"糯米腸包香腸，台灣夜市的熟悉味道。","tags":["warm","bold"]},
+    {"id":"veg_stinkytofu","name":"素脆皮臭豆腐","emoji":"🧈","min":80,"max":155,"meal":["dinner","late"],"type":"snack","veg":true,"reason":"外酥內嫩配泡菜，來點經典夜市香氣。","tags":["warm","bold"]},
+    {"id":"taiwan_meatball","name":"彰化肉圓","emoji":"🥟","min":55,"max":115,"meal":["lunch","dinner","late"],"type":"snack","veg":false,"reason":"Q彈外皮包著肉餡，淋上醬汁很對味。","tags":["warm","comfort"]},
+    {"id":"bamboo_rice_cake","name":"筒仔米糕","emoji":"🍚","min":55,"max":115,"meal":["lunch","dinner","late"],"type":"snack","veg":false,"reason":"糯米與肉燥蒸出濃郁香氣，簡單又有記憶點。","tags":["warm","comfort"]},
+    {"id":"panfried_buns","name":"鮮肉生煎包","emoji":"🥟","min":75,"max":150,"meal":["breakfast","lunch","late"],"type":"snack","veg":false,"reason":"煎得金黃的底部配熱熱肉汁，香氣滿滿。","tags":["warm","quick"]},
+    {"id":"beef_pepper_bun","name":"胡椒餅","emoji":"🥟","min":55,"max":110,"meal":["lunch","dinner","late"],"type":"snack","veg":false,"reason":"酥皮包著胡椒肉餡，很有街頭小吃魅力。","tags":["warm","bold","quick"]},
+    {"id":"salty_chicken","name":"鹽水雞拼盤","emoji":"🍗","min":120,"max":230,"meal":["dinner","late"],"type":"snack","veg":false,"reason":"蔬菜和雞肉自選配料，晚餐宵夜都合適。","tags":["fresh","light"]},
+    {"id":"fried_chicken_steak","name":"香酥炸雞排","emoji":"🍗","min":90,"max":160,"meal":["dinner","late"],"type":"snack","veg":false,"reason":"大口咬下酥脆外皮，今晚就吃點過癮的。","tags":["warm","treat"]},
+    {"id":"spicy_wontons","name":"紅油抄手","emoji":"🥟","min":90,"max":170,"meal":["lunch","dinner","late"],"type":"snack","veg":false,"reason":"抄手拌上香辣紅油，讓這一餐多點刺激。","tags":["warm","bold"]}
   ];
   const typeNames={rice:'飯類',noodle:'麵類',light:'輕食',world:'異國料理',snack:'小吃'};
   const mealNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',late:'宵夜'};
@@ -352,15 +434,15 @@
   // 不同餐點的用餐感受標籤；用於加權推薦，並非熱量、營養或健康評分。
   const tagGroups={
     soup:['porridge','beefnoodle','hotpotnoodle','ramen','tofusoup','pho','hotpot','bigpot','laksa','lumi','miso','congee','pumpkin'],
-    warm:['eggroll','toast','porridge','scallion','bento','braisedrice','beefnoodle','drynoodle','dumplings','veg_dumplings','hotpotnoodle','curry','vegcurry','ramen','bibimbap','tofusoup','pho','pastatomato','creamypasta','hotpot','bigpot','teppan','vegbento','mushroomrisotto','friedrice','riceplates','laksa','lumi','lo_mei','miso','vegbao','congee','pumpkin'],
+    warm:['eggroll','toast','porridge','scallion','bento','braisedrice','beefnoodle','drynoodle','dumplings','veg_dumplings','hotpotnoodle','curry','vegcurry','ramen','bibimbap','tofusoup','pho','pastatomato','creamypasta','hotpot','bigpot','teppan','vegbento','mushroomrisotto','friedrice','riceplates','laksa','lumi','lo_mei','miso','vegbao','congee','pumpkin','oyster','fishbento','toastpizza'],
     fresh:['sandwich','sandv','salad','grainbowl','sushi','onigiri','riceball','tacos','pancakes','pho','vegbao'],
     light:['sandwich','sandv','salad','grainbowl','onigiri','riceball','pho','pumpkin','vegbento','sushi'],
-    comfort:['porridge','braisedrice','beefnoodle','drynoodle','dumplings','veg_dumplings','curry','vegcurry','ramen','tofusoup','hotpot','bigpot','miso','congee','pumpkin','mushroomrisotto','friedrice','toast','pancakes'],
-    quick:['eggroll','riceball','toast','scallion','mushroomtoast','sandwich','onigiri','dumplings','vegbao','sandv','radish'],
-    treat:['pancakes','ramen','bibimbap','creamypasta','pizza','burgers','sushi','hotpot','bigpot','steak','teppan','mushroomrisotto','laksa','tacos'],
+    comfort:['porridge','braisedrice','beefnoodle','drynoodle','dumplings','veg_dumplings','curry','vegcurry','ramen','tofusoup','hotpot','bigpot','miso','congee','pumpkin','mushroomrisotto','friedrice','toast','pancakes','oyster'],
+    quick:['eggroll','riceball','toast','scallion','mushroomtoast','sandwich','onigiri','dumplings','vegbao','sandv','radish','toastpizza'],
+    treat:['pancakes','ramen','bibimbap','creamypasta','pizza','burgers','sushi','hotpot','bigpot','steak','teppan','mushroomrisotto','laksa','tacos','fishbento'],
     bold:['bigpot','riceplates','laksa','frieschicken','lo_mei','creamypasta','burgers','bibimbap','pizza']
   };
-  const tagsFor=food=>Object.keys(tagGroups).filter(tag=>tagGroups[tag].includes(food.id));
+  const tagsFor=food=>Array.isArray(food.tags)?food.tags:Object.keys(tagGroups).filter(tag=>tagGroups[tag].includes(food.id));
   const cityLocations={
     taipei:{name:'臺北市',lat:25.0330,lon:121.5654},newtaipei:{name:'新北市',lat:25.012,lon:121.465},
     taoyuan:{name:'桃園市',lat:24.9936,lon:121.3010},hsinchu:{name:'新竹市',lat:24.8039,lon:120.9647},
@@ -482,7 +564,7 @@
   const $chips=Array.from(document.querySelectorAll('.chip[data-group]'));
   function matchesBudget(food){const m=(food.min+food.max)/2;switch(state.budget){case 'low':return food.max<=100;case 'mid':return m>=100&&m<=200;case 'high':return m>200&&m<=350;case 'treat':return m>350;default:return true}}
   function candidates(){return meals.filter(food=>(state.meal==='all'||food.meal.includes(state.meal))&&(state.type==='all'||food.type===state.type)&&(!state.vegetarian||food.veg)&&matchesBudget(food));}
-  function updateCount(){const count=candidates().length;$('matchCount').textContent=`目前有 ${count} 道餐點符合條件`;$('pickBtn').disabled=count===0;if(!count){$('pickBtn').textContent='沒有符合的餐點';$('actionStatus').textContent='條件有點太嚴格了，試著放寬預算或餐別吧！'}else{$('pickBtn').textContent=current?'↻ 再抽一次！':'✦ 幫我決定吃什麼！';$('actionStatus').textContent=''}}
+  function updateCount(){const count=candidates().length;$('matchCount').textContent=`目前有 ${count} 道餐點符合條件（共 ${meals.length} 道）`;$('pickBtn').disabled=count===0;if(!count){$('pickBtn').textContent='沒有符合的餐點';$('actionStatus').textContent='條件有點太嚴格了，試著放寬預算或餐別吧！'}else{$('pickBtn').textContent=current?'↻ 再抽一次！':'✦ 幫我決定吃什麼！';$('actionStatus').textContent=''}}
   function renderResult(food){current=food;$('resultCard').classList.remove('bounce');void $('resultCard').offsetWidth;$('resultCard').classList.add('bounce');$('resultEmoji').textContent=food.emoji;$('resultLabel').textContent='TODAY’S PICK ✦';$('resultName').textContent=food.name;$('resultReason').textContent=recommendationReason(food);$('resultTags').replaceChildren();for(const label of [`約 NT$${food.min}–${food.max}`,typeNames[food.type],...(food.veg?['可選素食']:[])]){let tag=document.createElement('span');tag.textContent=label;$('resultTags').appendChild(tag)}$('favBtn').disabled=false;$('shareBtn').disabled=false;renderFavButton();}
   function choose(){const pool=candidates();if(!pool.length)return;const recent=new Set(history.slice(0,3).map(x=>x.id));let options=pool.filter(food=>!recent.has(food.id));if(!options.length)options=pool;let total=options.reduce((sum,food)=>sum+weightedRecommendation(food),0);let ticket=Math.random()*total;let food=options[options.length-1];for(const option of options){ticket-=weightedRecommendation(option);if(ticket<0){food=option;break;}}history.unshift(food);history=history.slice(0,5);renderResult(food);renderHistory();updateCount();if(window.matchMedia('(max-width:850px)').matches){$('resultCard').scrollIntoView({behavior:'smooth',block:'center'});}}
   function renderHistory(){const target=$('historyList');target.replaceChildren();if(!history.length){const p=document.createElement('p');p.className='empty-copy';p.textContent='還沒抽選，快來決定第一餐！';target.appendChild(p);return;}for(const food of history){const span=document.createElement('span');span.className='history-pill';span.textContent=food.emoji+' '+food.name;target.appendChild(span)}}
