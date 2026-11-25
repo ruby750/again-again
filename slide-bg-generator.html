@@ -168,7 +168,8 @@
   const fileInput=$('#fileInput'), dropZone=$('#dropZone'), sourcePreview=$('#sourcePreview');
   const defaultColors=['#E57B58','#3E5666','#D7B69E','#F2E4D6','#758A84','#242A32'];
   const labels=['主色','輔助','亮點','延伸','延伸','深色'];
-  const state={image:null,url:null,colors:[...defaultColors],mood:'soft',includePhoto:true,seed:0,loaded:false};
+  const defaultFeatures={aspect:1,brightness:.56,contrast:.2,complexity:.26,focusX:.68,focusY:.42,orientation:'mixed',pattern:'organic',darkRatio:.32,sat:.34,biasX:.5,biasY:.5,bands:3};
+  const state={image:null,url:null,colors:[...defaultColors],mood:'soft',includePhoto:true,seed:0,loaded:false,features:{...defaultFeatures}};
   let toastTimer;
   const escapeHtml=s=>String(s).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
   function toast(message){const t=$('#toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
@@ -177,6 +178,62 @@
   const mix=(a,b,p)=>hex(rgb(a).map((x,i)=>x*(1-p)+rgb(b)[i]*p));
   const luma=h=>rgb(h).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0)/255;
   const dist=(a,b)=>a.reduce((s,v,i)=>s+(v-b[i])**2,0);
+  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+  const alpha=(color,a)=>color+Math.round(clamp(a,0,1)*255).toString(16).padStart(2,'0').toUpperCase();
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  function analyzeImageFeatures(img){
+    const c=document.createElement('canvas');
+    const maxDim=96;
+    const ratio=Math.min(maxDim/img.naturalWidth,maxDim/img.naturalHeight,1);
+    c.width=Math.max(8,Math.round(img.naturalWidth*ratio));
+    c.height=Math.max(8,Math.round(img.naturalHeight*ratio));
+    const ctx=c.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(img,0,0,c.width,c.height);
+    const {data}=ctx.getImageData(0,0,c.width,c.height);
+    const gray=new Float32Array(c.width*c.height);
+    let lumSum=0, lumSq=0, satSum=0, darkCount=0, count=0;
+    for(let i=0,p=0;i<data.length;i+=4,p++){
+      if(data[i+3]<80) continue;
+      const r=data[i], g=data[i+1], b=data[i+2];
+      const max=Math.max(r,g,b), min=Math.min(r,g,b);
+      const lum=.2126*r+.7152*g+.0722*b;
+      gray[p]=lum;
+      lumSum+=lum; lumSq+=lum*lum;
+      satSum+=max?((max-min)/max):0;
+      if(lum<85) darkCount++;
+      count++;
+    }
+    if(!count) return {...defaultFeatures};
+    const avgLum=lumSum/count;
+    const contrast=Math.sqrt(Math.max(0,lumSq/count-avgLum*avgLum))/255;
+    let gxSum=0, gySum=0, magSum=0, weightedX=0, weightedY=0;
+    for(let y=0;y<c.height-1;y++){
+      for(let x=0;x<c.width-1;x++){
+        const idx=y*c.width+x;
+        const gx=(gray[idx+1]||0)-(gray[idx]||0);
+        const gy=(gray[idx+c.width]||0)-(gray[idx]||0);
+        const mag=Math.abs(gx)+Math.abs(gy);
+        gxSum+=Math.abs(gx); gySum+=Math.abs(gy); magSum+=mag;
+        weightedX+=mag*(x/c.width); weightedY+=mag*(y/c.height);
+      }
+    }
+    const complexity=clamp(magSum/((c.width-1)*(c.height-1)*160),0,1);
+    const biasX=gxSum/(gxSum+gySum||1), biasY=gySum/(gxSum+gySum||1);
+    const aspect=img.naturalWidth/img.naturalHeight;
+    const focusX=clamp(magSum?weightedX/magSum:.5,.12,.88);
+    const focusY=clamp(magSum?weightedY/magSum:.5,.12,.88);
+    const brightness=avgLum/255;
+    const darkRatio=darkCount/count;
+    const sat=satSum/count;
+    const orientation=biasX>.58?'vertical':biasY>.58?'horizontal':'mixed';
+    let pattern='organic';
+    if(complexity>.34 && (biasX>.6 || biasY>.6)) pattern='grid';
+    else if(aspect>1.45 || orientation==='horizontal') pattern='bands';
+    else if(contrast<.14 && sat<.2) pattern='minimal';
+    else if(Math.abs(focusX-.5)<.13 && Math.abs(focusY-.5)<.15) pattern='burst';
+    const bands=2+Math.round(clamp(complexity*4,0,3));
+    return {aspect,brightness,contrast,complexity,focusX,focusY,orientation,pattern,darkRatio,sat,biasX,biasY,bands};
+  }
   function renderPalette(){
     $('#palette').innerHTML='';
     state.colors.forEach((c,i)=>{const b=document.createElement('button');b.className='swatch';b.type='button';b.title='複製 '+c;b.innerHTML=`<span class="swatch-color" style="--swatch:${escapeHtml(c)}"></span><span class="swatch-code">${escapeHtml(c)}</span><span class="swatch-label">${labels[i]}</span>`;b.addEventListener('click',()=>copyText(c,'已複製 '+c));$('#palette').appendChild(b)});
@@ -205,39 +262,106 @@
   function fillRect(ctx,x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h)}
   function linear(ctx,x,y,x2,y2,a,b){const grad=ctx.createLinearGradient(x,y,x2,y2);grad.addColorStop(0,a);grad.addColorStop(1,b);return grad}
   function circle(ctx,x,y,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+  function line(ctx,x1,y1,x2,y2,color,w=2){ctx.strokeStyle=color;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
   function drawPhoto(ctx,x,y,w,h,alpha=1,radius=0){if(!state.image||!state.includePhoto)return false;const img=state.image,iw=img.naturalWidth,ih=img.naturalHeight;const scale=Math.max(w/iw,h/ih),dw=iw*scale,dh=ih*scale;ctx.save();ctx.globalAlpha=alpha;rounded(ctx,x,y,w,h,radius);ctx.clip();ctx.drawImage(img,x+(w-dw)/2,y+(h-dh)/2,dw,dh);ctx.restore();return true}
-  function photoGlow(ctx,c,w,h){if(state.includePhoto&&state.image){ctx.save();ctx.filter='blur(105px)';drawPhoto(ctx,-150,-130,w+300,h+260,.42);ctx.restore()}else{const g=ctx.createRadialGradient(w*.8,h*.3,100,w*.8,h*.3,h);g.addColorStop(0,c[2]+'88');g.addColorStop(1,'transparent');fillRect(ctx,0,0,w,h,g)}}
-  function art(ctx,kind){
-    const C=state.colors;const soft=state.mood==='soft';const dark=C.reduce((p,c)=>luma(c)<luma(p)?c:p,C[0]);const light=C.reduce((p,c)=>luma(c)>luma(p)?c:p,C[0]);const accent=C[0];const p1=C[1],p2=C[2],p3=C[3];const s=state.seed;const shift=(s%5)*34;
-    if(kind===0){ // 封面：左側清楚的標題空間
-      fillRect(ctx,0,0,1920,1080,linear(ctx,0,0,1920,950,mix(dark,'#10141B',.5),mix(p1,dark,.55)));
-      circle(ctx,1505+shift,260,580,p2+'28');circle(ctx,1720,970,370,accent+'33');
-      if(!drawPhoto(ctx,1030+shift/3,122,770,835,soft?.8:.93,55)){
-        fillRect(ctx,1060,120,730,835,linear(ctx,1060,180,1770,880,accent,p1));circle(ctx,1420,470,270,p3+'77');circle(ctx,1670,760,240,dark+'77')
+  function photoGlow(ctx,c,w,h){if(state.includePhoto&&state.image){ctx.save();ctx.filter='blur(105px)';drawPhoto(ctx,-150,-130,w+300,h+260,.42);ctx.restore()}else{const g=ctx.createRadialGradient(w*.8,h*.3,100,w*.8,h*.3,h);g.addColorStop(0,alpha(c[2],.55));g.addColorStop(1,'transparent');fillRect(ctx,0,0,w,h,g)}}
+  function decorateFeature(ctx,F,C,w,h,seed){
+    const fx=clamp(F.focusX,.12,.88)*w, fy=clamp(F.focusY,.12,.88)*h;
+    const accent=C[0], p1=C[1], p2=C[2], p3=C[3], dark=C[5]||C[1];
+    if(F.pattern==='grid'){
+      const vx=[fx-w*.23,fx,fx+w*.19], hy=[fy-h*.23,fy,fy+h*.21];
+      ctx.save(); ctx.lineWidth=2;
+      vx.forEach((x,i)=>line(ctx,clamp(x,40,w-40),40,clamp(x,40,w-40),h-40,alpha(i%2?accent:p1,.26),2));
+      hy.forEach((y,i)=>line(ctx,40,clamp(y,40,h-40),w-40,clamp(y,40,h-40),alpha(i%2?p2:accent,.2),2));
+      line(ctx,fx-55,fy,fx+55,fy,alpha(dark,.32),3); line(ctx,fx,fy-55,fx,fy+55,alpha(dark,.32),3);
+      ctx.restore();
+    }else if(F.pattern==='bands'){
+      ctx.save(); ctx.globalAlpha=.22;
+      for(let i=0;i<F.bands;i++){
+        const yy=lerp(-h*.15,h*.85,i/Math.max(1,F.bands-1));
+        ctx.save(); ctx.translate(0,yy+(seed%3)*22); ctx.rotate(-0.32+(i*.06));
+        fillRect(ctx,-120,0,w*1.4,110+i*8,i%2?alpha(accent,.85):alpha(p1,.65));
+        ctx.restore();
       }
-      fillRect(ctx,1060+shift/3,122,24,835,accent+'B8');
+      ctx.restore();
+    }else if(F.pattern==='burst'){
+      ctx.save();
+      [120,240,380].forEach((r,i)=>{ctx.strokeStyle=alpha(i%2?accent:p2,.18-.04*i+.04);ctx.lineWidth=8-2*i;ctx.beginPath();ctx.arc(fx,fy,r,0,Math.PI*2);ctx.stroke()});
+      circle(ctx,fx,fy,28,alpha(accent,.38));
+      ctx.restore();
+    }else if(F.pattern==='minimal'){
+      line(ctx,70,70,250,70,alpha(accent,.4),6);
+      line(ctx,w-250,h-70,w-70,h-70,alpha(p1,.28),4);
+      fillRect(ctx,w-190,70,120,12,alpha(p2,.22));
+    }else{
+      ctx.save(); ctx.globalAlpha=.18;
+      circle(ctx,fx-w*.09,fy+h*.03,170,p1); circle(ctx,fx+w*.11,fy-h*.08,120,accent); circle(ctx,fx+w*.24,fy+h*.18,92,p2);
+      rounded(ctx,clamp(fx-w*.18,60,w-430),clamp(fy-h*.14,40,h-280),320,180,38); ctx.fillStyle=alpha(p3,.24); ctx.fill();
+      ctx.restore();
+    }
+  }
+  function art(ctx,kind){
+    const C=state.colors; const F=state.features||defaultFeatures; const soft=state.mood==='soft';
+    const dark=C.reduce((p,c)=>luma(c)<luma(p)?c:p,C[0]);
+    const light=C.reduce((p,c)=>luma(c)>luma(p)?c:p,C[0]);
+    const accent=C[0], p1=C[1], p2=C[2], p3=C[3], p4=C[4]||C[2];
+    const s=state.seed; const shift=(s%5)*34;
+    const fx=clamp(F.focusX,.14,.86)*1920, fy=clamp(F.focusY,.14,.86)*1080;
+    if(kind===0){
+      fillRect(ctx,0,0,1920,1080,linear(ctx,0,0,1920,950,mix(dark,'#10141B',.5),mix(p1,dark,.55)));
+      decorateFeature(ctx,F,C,1920,1080,s);
+      circle(ctx,1505+shift,260, F.pattern==='burst'?430:580, alpha(p2,.16));
+      circle(ctx,1720,970, F.pattern==='bands'?240:370, alpha(accent,.2));
+      const photoX=F.pattern==='bands'?890:(F.pattern==='burst'?1080:1030+shift/3);
+      const photoY=F.pattern==='burst'?145:122;
+      const photoW=F.pattern==='bands'?880:770;
+      const photoH=F.pattern==='bands'?520:(F.pattern==='burst'?790:835);
+      if(!drawPhoto(ctx,photoX,photoY,photoW,photoH,soft?.82:.93,F.pattern==='grid'?18:55)){
+        fillRect(ctx,photoX,photoY,photoW,photoH,linear(ctx,photoX,photoY,photoX+photoW,photoY+photoH,accent,p1));
+        decorateFeature(ctx,{...F,pattern:F.pattern==='minimal'?'organic':F.pattern},[accent,p1,p2,p3,p4,dark],photoW,photoH,s+1);
+      }
+      fillRect(ctx,photoX+(F.pattern==='bands'?0:30),photoY, F.pattern==='minimal'?10:24,photoH,alpha(accent,.72));
       fillRect(ctx,135,138,205,12,accent);fillRect(ctx,135,886,440,3,'#FFFFFF44');circle(ctx,142,948,13,accent);
-      if(soft)fillRect(ctx,1030+shift/3,122,770,835,'#FFFFFF0C');
-    }else if(kind===1){ // 內容：大量留白
+      if(soft)fillRect(ctx,photoX,photoY,photoW,photoH,'#FFFFFF0C');
+    }else if(kind===1){
       const bg=mix(light,'#FFFFFF',soft?.9:.8);fillRect(ctx,0,0,1920,1080,bg);
+      decorateFeature(ctx,F,C,1920,1080,s+2);
       fillRect(ctx,0,0,1920,21,accent);fillRect(ctx,110,120,3,760,mix(dark,bg,.5));
-      ctx.save();ctx.beginPath();ctx.arc(1630+shift/3,245,278,0,Math.PI*2);ctx.clip();
-      if(!drawPhoto(ctx,1310+shift/3,-100,650,650,soft?.36:.62)){circle(ctx,1650,220,270,p1+'BB');circle(ctx,1570,200,180,accent+'88')}
-      ctx.restore();circle(ctx,1710,980,280,accent+(soft?'18':'32'));
+      if(F.pattern==='burst'){
+        ctx.save(); ctx.beginPath(); ctx.arc(fx,fy,285,0,Math.PI*2); ctx.clip();
+        if(!drawPhoto(ctx,fx-320,fy-320,640,640,soft?.32:.58,0)){circle(ctx,fx,fy,270,alpha(p1,.72));circle(ctx,fx-80,fy-25,170,alpha(accent,.46))}
+        ctx.restore();
+      }else{
+        ctx.save();ctx.beginPath();ctx.arc(1630+shift/3,245,278,0,Math.PI*2);ctx.clip();
+        if(!drawPhoto(ctx,1310+shift/3,-100,650,650,soft?.36:.62)){circle(ctx,1650,220,270,alpha(p1,.73));circle(ctx,1570,200,180,alpha(accent,.54))}
+        ctx.restore();
+      }
+      if(F.pattern==='grid'){
+        fillRect(ctx,1270,700,460,170,alpha(p2,.16));
+        line(ctx,1270,785,1730,785,alpha(dark,.18),3);
+      }
+      circle(ctx,1710,980, F.pattern==='minimal'?180:280, alpha(accent,soft?.09:.18));
       fillRect(ctx,1380,944,420,5,mix(accent,bg,.45));fillRect(ctx,110,943,410,3,mix(dark,bg,.68));
-    }else if(kind===2){ // 圖文：左圖右側放文字
+    }else if(kind===2){
       const bg=mix(light,'#FFFFFF',soft?.85:.68);fillRect(ctx,0,0,1920,1080,bg);
-      if(!drawPhoto(ctx,0,0,835+shift/2,1080,.95)){fillRect(ctx,0,0,850,1080,linear(ctx,0,0,800,1080,p1,accent));circle(ctx,420,450,400,p2+'89')}
-      fillRect(ctx,830+shift/2,0,14,1080,accent);
-      fillRect(ctx,1005,114,250,13,accent);circle(ctx,1775,155,64,p1+'28');
+      if(F.pattern==='bands') decorateFeature(ctx,F,C,1920,1080,s+3);
+      const leftW=F.pattern==='grid'?760:(F.pattern==='bands'?980:835+shift/2);
+      if(!drawPhoto(ctx,0,0,leftW,1080,.95,F.pattern==='minimal'?0:18)){
+        fillRect(ctx,0,0,leftW,1080,linear(ctx,0,0,leftW,1080,p1,accent));
+        decorateFeature(ctx,{...F,pattern:F.pattern==='burst'?'organic':F.pattern},[accent,p1,p2,p3,p4,dark],leftW,1080,s+4);
+      }
+      fillRect(ctx,leftW-5,0,14,1080,accent);
+      fillRect(ctx,Math.max(leftW+120,1005),114,250,13,accent);circle(ctx,1775,155,64,alpha(p1,.16));
       fillRect(ctx,1010,947,790,3,mix(dark,bg,.67));
-      ctx.save();ctx.strokeStyle=accent+'55';ctx.lineWidth=3;ctx.strokeRect(955,65,890,940);ctx.restore();
-    }else{ // 結尾：深色沉浸式
+      ctx.save();ctx.strokeStyle=alpha(accent,.33);ctx.lineWidth=3;ctx.strokeRect(955,65,890,940);ctx.restore();
+      if(F.pattern!=='bands') decorateFeature(ctx,{...F,pattern:F.pattern==='grid'?'minimal':F.pattern},C,1920,1080,s+5);
+    }else{
       fillRect(ctx,0,0,1920,1080,linear(ctx,0,0,1700,900,mix(dark,'#13151A',.5),mix(p1,'#181E24',.65)));
-      photoGlow(ctx,C,1920,1080);fillRect(ctx,0,0,1920,1080,soft?'#080A1099':'#05071088');
-      ctx.save();ctx.beginPath();ctx.arc(1455-shift/2,535,370,0,Math.PI*2);ctx.clip();
-      if(!drawPhoto(ctx,1075-shift/2,150,760,760,.82)){circle(ctx,1470,550,390,accent);circle(ctx,1600,700,300,p1+'88')}
-      ctx.restore();ctx.strokeStyle=p3+'A5';ctx.lineWidth=4;ctx.beginPath();ctx.arc(1455-shift/2,535,393,0,Math.PI*2);ctx.stroke();
+      photoGlow(ctx,C,1920,1080); decorateFeature(ctx,F,C,1920,1080,s+6); fillRect(ctx,0,0,1920,1080,soft?'#080A1099':'#05071088');
+      const cx=F.pattern==='burst'?fx:1455-shift/2, cy=F.pattern==='burst'?fy:535;
+      ctx.save();ctx.beginPath();ctx.arc(cx,cy,F.pattern==='minimal'?300:370,0,Math.PI*2);ctx.clip();
+      if(!drawPhoto(ctx,cx-380,cy-380,760,760,.82)){circle(ctx,cx+15,cy+15,390,accent);circle(ctx,cx+145,cy+165,300,alpha(p1,.54))}
+      ctx.restore();ctx.strokeStyle=alpha(p3,.65);ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,F.pattern==='minimal'?326:393,0,Math.PI*2);ctx.stroke();
       fillRect(ctx,150,138,230,12,accent);fillRect(ctx,150,905,800,3,'#FFFFFF88');circle(ctx,165,966,15,p2);
     }
     // 避免截圖出現任何預先寫死的文字：此圖片可以自由添加簡報標題。
@@ -250,7 +374,7 @@
     if(file.size>15*1024*1024){toast('圖片超過 15 MB，請先壓縮後再試');return}
     $('#status').textContent='正在分析圖片顏色…';
     const url=URL.createObjectURL(file),img=new Image();
-    img.onload=()=>{if(state.url)URL.revokeObjectURL(state.url);state.url=url;state.image=img;state.seed=0;state.loaded=true;state.colors=generatePalette(img);sourcePreview.src=url;$('#sourceName').textContent=file.name+' · '+img.naturalWidth+' × '+img.naturalHeight;dropZone.classList.add('has-image');$('#paletteHint').textContent='已從你的主視覺取樣六組配色。';$('#generateBtn').disabled=false;$('#copyAll').disabled=false;document.querySelectorAll('.download').forEach(b=>b.disabled=false);renderPalette();renderPreviews();$('#status').textContent='完成！可以複製色碼，或下載四款底圖。';toast('主視覺解析完成，四款底圖已更新')};
+    img.onload=()=>{if(state.url)URL.revokeObjectURL(state.url);state.url=url;state.image=img;state.features=analyzeImageFeatures(img);state.seed=Math.round((state.features.focusX+state.features.focusY+state.features.complexity)*100)%7;state.loaded=true;state.colors=generatePalette(img);sourcePreview.src=url;$('#sourceName').textContent=file.name+' · '+img.naturalWidth+' × '+img.naturalHeight;dropZone.classList.add('has-image');$('#paletteHint').textContent='已從你的主視覺取樣六組配色，並依圖片特徵變化底圖構圖。';$('#generateBtn').disabled=false;$('#copyAll').disabled=false;document.querySelectorAll('.download').forEach(b=>b.disabled=false);renderPalette();renderPreviews();$('#status').textContent='完成！可以複製色碼，或下載四款底圖。';toast('主視覺解析完成，底圖花紋會跟著圖片特徵改變')};
     img.onerror=()=>{URL.revokeObjectURL(url);$('#status').textContent='無法開啟圖片，請換一張試試。';toast('圖片格式可能不支援，請換一張圖片')};
     img.src=url;
   }
