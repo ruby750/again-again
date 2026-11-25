@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f4ec">
+  <title>今天吃什麼？｜一鍵幫你決定下一餐</title>
+  <meta name="description" content="不知道今天吃什麼？結合即時天氣、溫度、心情與預算，幫你挑選下一餐；可收藏餐點，還有適合當下的推薦理由！">
+  <link rel="canonical" href="https://ruby750.github.io/again-again/what-to-eat.html">
+  <link rel="icon" type="image/svg+xml" href="eat-favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:title" content="今天吃什麼？｜一鍵幫你決定下一餐">
+  <meta property="og:description" content="根據天氣、溫度、心情、預算與飲食偏好，推薦適合的下一餐。">
+  <meta property="og:url" content="https://ruby750.github.io/again-again/what-to-eat.html">
+  <meta property="og:image" content="https://ruby750.github.io/again-again/eat-og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="今天吃什麼？｜一鍵幫你決定下一餐">
+  <meta name="twitter:description" content="參考當下天氣和你的心情，下一餐就交給小工具！">
+  <meta name="twitter:image" content="https://ruby750.github.io/again-again/eat-og.png">
+  <!-- 與個人首頁一致的 Google Tag Manager。請在 GTM 中確認已設定 GA4。 -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-PG6DHGT6');</script>
+  <!-- 若老師要求直接放 GA4 G- 編號，可在下方填入自己的 Measurement ID，
+       不要填入別人的編號；若 GTM 已啟用 GA4，避免重複計算。 -->
+  <script>
+    const GA4_MEASUREMENT_ID = ''; // 例如：G-XXXXXXXXXX（請換成自己的真實編號）
+    if (/^G-[A-Z0-9]+$/.test(GA4_MEASUREMENT_ID)) {
+      const tag = document.createElement('script');
+      tag.async = true;
+      tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA4_MEASUREMENT_ID);
+      document.head.appendChild(tag);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){window.dataLayer.push(arguments);};
+      window.gtag('js', new Date());
+      window.gtag('config', GA4_MEASUREMENT_ID);
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {--bg:#f8f4ec;--paper:#fffdf7;--ink:#242622;--muted:#75776e;--line:#ddd8cd;--orange:#f46c35;--orange-dark:#dc5123;--mint:#def1d6;--blue:#dcebf5;--round:25px}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:'DM Sans','Noto Sans TC',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .page{max-width:1200px;margin:0 auto;padding:0 28px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding-top:25px;padding-bottom:23px;border-bottom:1px solid #cfcabd;gap:12px}
+    .brand{display:flex;gap:12px;align-items:center;text-decoration:none;font-size:14px;font-weight:800;letter-spacing:.07em}
+    .brand-stamp{width:43px;height:43px;border-radius:13px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:22px;transform:rotate(-8deg)}
+    .top-links{display:flex;align-items:center;gap:18px}
+    .link-pill{border:1px solid var(--ink);border-radius:999px;padding:12px 19px;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap;transition:.2s}
+    .link-pill:hover{background:var(--ink);color:#fff}
+    .micro{font-size:11px;letter-spacing:.20em;font-weight:800;color:#74776e}
+    .hero{padding:54px 0 37px;display:grid;grid-template-columns:1.05fr .95fr;align-items:end;gap:30px}
+    .hero h1{font-size:clamp(52px,7vw,102px);font-weight:900;letter-spacing:-.075em;line-height:1.16;margin:18px 0 20px}
+    .hero h1 em{font-style:normal;color:var(--orange);position:relative;white-space:nowrap}
+    .hero .tagline{font-size:17px;color:#5f625a;line-height:1.9;max-width:500px;margin:0}
+    .hero-art{position:relative;height:235px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .circle-art{width:230px;height:230px;border-radius:50%;background:var(--mint);display:flex;align-items:center;justify-content:center;transform:rotate(-11deg);box-shadow:20px 6px 0 #edddbe}
+    .circle-art span{font-size:118px;filter:drop-shadow(0 8px 0 rgba(0,0,0,.08));transform:rotate(11deg)}
+    .art-sticker{position:absolute;right:7%;top:17px;background:var(--orange);color:white;border-radius:999px;padding:12px 20px;font-size:13px;font-weight:800;transform:rotate(11deg)}
+    .art-scribble{position:absolute;bottom:14px;left:16%;font-weight:800;font-size:14px;transform:rotate(-9deg);color:#a36840}
+    .workarea{display:grid;grid-template-columns:minmax(0,.87fr) minmax(0,1.13fr);gap:22px;align-items:start;padding-bottom:25px}
+    .filter-card,.result-shell,.mini-card{border:1px solid var(--line);border-radius:var(--round)}
+    .filter-card{background:var(--paper);padding:31px}
+    .panel-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:28px}
+    .panel-top h2{font-size:22px;margin:0;letter-spacing:-.03em}
+    .step{font-size:12px;color:#9e9b93;font-weight:700;letter-spacing:.12em}
+    .field{margin-bottom:26px}
+    .field-title{font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+    .field-title small{color:#a09d93;font-weight:500;font-size:11px}
+    .chips{display:flex;flex-wrap:wrap;gap:9px}
+    .chip{border:1px solid #e5dfd4;border-radius:999px;padding:10px 15px;background:#f7f3ea;font-size:13px;font-weight:700;transition:transform .15s,background .15s,border-color .15s;min-height:43px}
+    .chip:hover{transform:translateY(-2px);border-color:var(--orange)}
+    .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+    .diet-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0 0;border-top:1px dashed #ddd6c7}
+    .diet-label{font-size:14px;font-weight:800}
+    .diet-desc{font-size:11px;color:var(--muted);line-height:1.8;margin-top:3px}
+    .toggle{position:relative;width:53px;height:31px;background:#ccc7bb;border:0;border-radius:100px;flex-shrink:0;transition:background .2s}
+    .toggle::after{content:"";position:absolute;top:4px;left:4px;width:23px;height:23px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px #0002}
+    .toggle[aria-checked="true"]{background:#599a61}
+    .toggle[aria-checked="true"]::after{transform:translateX(22px)}
+    .filter-note{font-size:12px;color:var(--muted);margin:20px 0 0;line-height:1.8}
+    .filter-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:10px}
+    .match-count{color:#74776e;font-size:12px}
+    .reset-btn{background:none;border:0;text-decoration:underline;text-underline-offset:4px;font-size:12px;font-weight:800;color:var(--ink);padding:8px 2px}
+    .right-col{display:flex;flex-direction:column;gap:18px;min-width:0}
+    .result-shell{background:#242825;color:#fff;padding:22px;overflow:hidden;position:relative}
+    .result-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 3px 17px}
+    .result-top .micro{color:#c6cbbf}
+    .result-top .star{color:#ffbf69;font-size:26px;line-height:1}
+    .result-card{background:#fffbf4;color:var(--ink);border-radius:20px;min-height:335px;padding:25px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;isolation:isolate;overflow:hidden}
+    .result-card::before,.result-card::after{content:"";z-index:-1;position:absolute;border-radius:50%}
+    .result-card::before{background:#fce4cf;width:270px;height:270px;top:-132px;right:-68px}
+    .result-card::after{background:#e7edd9;width:200px;height:200px;bottom:-117px;left:-50px}
+    .result-emoji{font-size:100px;line-height:1.15;margin-bottom:13px;filter:drop-shadow(3px 9px 1px #00000013)}
+    .result-label{font-size:11px;font-weight:800;color:var(--orange-dark);letter-spacing:.2em;margin-bottom:10px}
+    .result-name{font-size:clamp(30px,3.4vw,43px);line-height:1.3;font-weight:900;letter-spacing:-.045em;margin:0 0 12px;overflow-wrap:anywhere}
+    .result-reason{font-size:14px;color:#6e6e65;line-height:1.8;margin:0 auto;max-width:360px}
+    .result-tags{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:17px}
+    .result-tags span{background:#f1eee7;border:1px solid #e2dfd7;border-radius:999px;padding:6px 11px;color:#5a5d57;font-size:11px;font-weight:700}
+    .result-card.bounce .result-emoji{animation:pop .4s ease-out}
+    @keyframes pop{from{transform:scale(.65) rotate(-15deg);opacity:.3}to{transform:scale(1) rotate(0);opacity:1}}
+    .primary-btn{width:100%;min-height:64px;margin-top:17px;border:0;border-radius:15px;background:var(--orange);color:#fff;font-size:18px;font-weight:900;letter-spacing:.06em;box-shadow:0 5px 0 #bd481d;transition:transform .12s,box-shadow .12s,background .12s}
+    .primary-btn:hover{background:#ff7a46}
+    .primary-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #bd481d}
+    .primary-btn:disabled{cursor:not-allowed;opacity:.5;box-shadow:none}
+    .result-actions{display:flex;gap:9px;margin-top:15px}
+    .sub-btn{flex:1;min-height:44px;border:1px solid #666b64;color:#fff;border-radius:12px;background:#343a35;font-weight:700;font-size:13px;transition:.2s}
+    .sub-btn:hover{background:#515b51}
+    .sub-btn:disabled{opacity:.45;cursor:not-allowed}
+    .sub-btn.favorited{background:#583b35;border-color:#ed946c;color:#ffd6c4}
+    .status{color:#c2d8bd;font-size:12px;text-align:center;margin:10px 0 0;min-height:18px}
+    .mini-card{background:#fffcf5;padding:23px 26px}
+    .mini-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}
+    .mini-head h3{margin:0;font-size:17px}
+    .mini-caption{font-size:11px;color:var(--muted)}
+    .pill-list{display:flex;flex-wrap:wrap;gap:8px}
+    .history-pill{font-size:12px;background:#f6f0e7;color:#4e514c;border:1px solid #e9dfd4;border-radius:999px;padding:8px 12px}
+    .empty-copy{font-size:13px;color:#8a8a80;margin:0;line-height:1.75}
+    .fav-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #eee5d8}
+    .fav-row:first-child{border-top:0}
+    .fav-name{font-size:14px;font-weight:700}
+    .fav-remove{background:none;border:0;color:#b05038;font-size:12px;text-decoration:underline;text-underline-offset:3px;padding:6px}
+    .helper{margin:15px 0 45px;padding:20px 25px;border-radius:18px;background:#eae5da;display:flex;align-items:flex-start;gap:13px;color:#64675e;font-size:13px;line-height:1.8}
+    .helper strong{color:#373b34}
+    footer{border-top:1px solid #cfcabd;padding:25px 0 32px;display:flex;justify-content:space-between;align-items:center;gap:12px;color:#818278;font-size:12px}
+    footer a{text-underline-offset:4px}
+    @media(max-width:850px){.hero{grid-template-columns:1fr;padding-top:35px}.hero-art{display:none}.workarea{grid-template-columns:1fr}.result-card{min-height:310px}.filter-card{padding:25px}}
+    @media(max-width:520px){.page{padding:0 17px}.topbar{padding-top:17px;padding-bottom:17px}.brand{font-size:12px}.brand-stamp{width:38px;height:38px}.link-pill{font-size:12px;padding:10px 13px}.top-links .micro{display:none}.hero{padding-top:31px;padding-bottom:25px}.hero h1{font-size:clamp(48px,13vw,66px);margin:13px 0 15px}.hero .tagline{font-size:14px}.filter-card{padding:22px 18px}.panel-top h2{font-size:20px}.field{margin-bottom:22px}.chip{padding:10px 12px;font-size:12px;min-height:41px}.result-shell{padding:13px}.result-card{min-height:300px;padding:20px}.result-emoji{font-size:83px}.result-name{font-size:32px}.result-reason{font-size:13px}.primary-btn{font-size:16px}.mini-card{padding:20px 18px}.helper{margin-top:8px;padding:17px;font-size:12px}footer{flex-direction:column;align-items:start}}
+
+    /* 天氣與心情推薦：延續原本暖色系的簡潔風格 */
+    .weather-card{border:1px solid #d9d7c9;background:#e7efe5;border-radius:25px;padding:24px 29px;margin:2px 0 23px}
+    .weather-head{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:13px}
+    .weather-head .micro{color:#50644d}
+    .weather-status{font-size:12px;color:#5b715a;font-weight:700;text-align:right}
+    .weather-main-row{display:flex;align-items:center;gap:16px;margin-bottom:15px}
+    .weather-icon{font-size:53px;line-height:1}
+    .weather-summary{min-width:0;flex:1}
+    .weather-summary strong{font-size:26px;font-weight:900;letter-spacing:-.03em;display:block}
+    .weather-summary p{font-size:13px;color:#596b57;margin:6px 0 0;line-height:1.7}
+    .weather-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+    .weather-controls label{font-size:12px;font-weight:800;color:#435542}
+    .weather-controls select{font:inherit;font-weight:700;font-size:13px;border:1px solid #bac9b4;border-radius:11px;padding:10px 8px;color:#283a29;background:#fffdf7;min-height:43px;max-width:180px}
+    .weather-btn{background:#f9fcf8;border:1px solid #bac9b4;border-radius:11px;padding:10px 13px;color:#304833;font-size:12px;font-weight:800;min-height:43px}
+    .weather-btn:hover{background:#fff}
+    .weather-btn:disabled{opacity:.58;cursor:not-allowed}
+    .weather-help{font-size:11px;line-height:1.8;color:#697866;margin:14px 0 0}
+    .weather-help a{text-underline-offset:3px}
+    .manual-panel{background:#fafbf6;border:1px solid #c9d2c3;border-radius:17px;padding:17px;margin-top:15px}
+    .manual-panel[hidden]{display:none}
+    .manual-label{font-size:13px;font-weight:800;margin:0 0 10px}
+    .manual-weather-options{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .weather-choice{border:1px solid #d9dbce;background:#fff;border-radius:999px;padding:9px 14px;font-weight:700;font-size:12px;min-height:40px}
+    .weather-choice[aria-pressed="true"]{background:#33483a;color:#fff;border-color:#33483a}
+    .temperature-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:700;font-size:13px;margin-bottom:9px}
+    .temperature-row output{font-size:20px;font-weight:900}
+    #manualTemperature{width:100%;accent-color:var(--orange);cursor:pointer}
+    .apply-weather{background:#33483a;color:white;border:0;border-radius:12px;padding:11px 18px;min-height:44px;font-size:13px;font-weight:800;margin-top:11px}
+    .mood-hint{font-size:12px;color:#77786e;line-height:1.7;margin:11px 0 0}
+    .result-reason{max-width:410px}
+    .weather-reason{display:block;color:#496c4b;font-weight:800;margin-bottom:8px}
+    .weather-source-tag{font-size:11px;color:#8b8b7d;margin-top:9px}
+    @media(max-width:520px){.weather-card{padding:18px 16px}.weather-main-row{gap:12px}.weather-icon{font-size:45px}.weather-summary strong{font-size:22px}.weather-controls label{width:100%}.weather-controls select{flex:1;max-width:none}.weather-btn{padding:10px 11px}.weather-head{align-items:flex-start}.weather-status{max-width:57%}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="回到趙奕如的個人首頁"><span class="brand-stamp">食</span><span>DAILY LITTLE TOOLS <span aria-hidden="true">✳</span></span></a>
+      <div class="top-links"><span class="micro">TOOL NO. 01</span><a class="link-pill" href="index.html">← 回首頁</a></div>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="micro">YOUR NEXT MEAL, DECIDED.</div>
+          <h1 id="hero-title">今天<br>吃<em>什麼？</em></h1>
+          <p class="tagline">每天都要吃飯，卻每天都不知道吃什麼。<br>看看今天的天氣，再選一下心情，<br>讓我幫你挑最適合現在的一餐！</p>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="circle-art"><span>🍜</span></div><span class="art-sticker">選擇困難救星 ✦</span><span class="art-scribble">NO MORE “隨便” !</span></div>
+      </section>
+
+      <section class="weather-card" aria-labelledby="weatherHeading">
+        <div class="weather-head"><span id="weatherHeading" class="micro">☀ WEATHER CHECK — 今天的天氣</span><span id="weatherStatus" class="weather-status" role="status">正在取得臺北市天氣…</span></div>
+        <div class="weather-main-row">
+          <span id="weatherIcon" class="weather-icon" aria-hidden="true">🌤️</span>
+          <div class="weather-summary"><strong id="weatherTitle">讀取天氣中…</strong><p id="weatherDetail">讀取完成後會自動納入推薦；也可以自己設定。</p></div>
+        </div>
+        <div class="weather-controls">
+          <label for="citySelect">地區</label>
+          <select id="citySelect" aria-label="選擇天氣地區">
+            <option value="taipei">臺北市</option><option value="newtaipei">新北市</option><option value="taoyuan">桃園市</option>
+            <option value="hsinchu">新竹市</option><option value="taichung">臺中市</option><option value="changhua">彰化縣</option>
+            <option value="chiayi">嘉義市</option><option value="tainan">臺南市</option><option value="kaohsiung">高雄市</option>
+            <option value="yilan">宜蘭縣</option><option value="hualien">花蓮縣</option><option value="taitung">臺東縣</option>
+          </select>
+          <button id="refreshWeatherBtn" class="weather-btn" type="button">↻ 更新天氣</button>
+          <button id="geoWeatherBtn" class="weather-btn" type="button">◎ 使用我的位置</button>
+          <button id="manualWeatherBtn" class="weather-btn" type="button" aria-expanded="false" aria-controls="manualWeatherPanel">✎ 手動設定</button>
+        </div>
+        <div id="manualWeatherPanel" class="manual-panel" hidden>
+          <p class="manual-label">無法取得天氣，或想自己調整？</p>
+          <div class="manual-weather-options" role="group" aria-label="手動設定天氣">
+            <button class="weather-choice" type="button" data-weather="sunny" aria-pressed="true">☀️ 晴天</button>
+            <button class="weather-choice" type="button" data-weather="cloudy" aria-pressed="false">☁️ 陰天</button>
+            <button class="weather-choice" type="button" data-weather="rainy" aria-pressed="false">🌧️ 下雨</button>
+          </div>
+          <div class="temperature-row"><label for="manualTemperature">現在大約幾度？</label><output id="manualTempValue" for="manualTemperature">25°C</output></div>
+          <input id="manualTemperature" type="range" min="5" max="40" step="1" value="25">
+          <button id="applyWeatherBtn" class="apply-weather" type="button">套用這組天氣 ☑</button>
+        </div>
+        <p class="weather-help">預設讀取臺北市的氣象資料；點「使用我的位置」才會詢問定位權限。天氣資料由 <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> 提供，屬模式估計而非現場實測；定位座標只用於向天氣服務查詢，不會存入收藏。</p>
+      </section>
+      <div class="workarea">
+        <section class="filter-card" aria-labelledby="filter-title">
+          <div class="panel-top"><h2 id="filter-title">先告訴我一點點 ⋆</h2><span class="step">01 — 選擇條件</span></div>
+          <div class="field"><div class="field-title">🍳 現在想吃哪一餐？</div>
+            <div class="chips" role="group" aria-label="選擇餐別">
+              <button class="chip" type="button" data-group="meal" data-value="all" aria-pressed="true">都可以</button>
+              <button class="chip" type="button" data-group="meal" data-value="breakfast" aria-pressed="false">早餐</button>
+              <button class="chip" type="button" data-group="meal" data-value="lunch" aria-pressed="false">午餐</button>
+              <button class="chip" type="button" data-group="meal" data-value="dinner" aria-pressed="false">晚餐</button>
+              <button class="chip" type="button" data-group="meal" data-value="late" aria-pressed="false">宵夜</button>
+            </div>
+          </div>
+          <div class="field"><div class="field-title">💰 今天的預算 <small>新臺幣 NT$</small></div>
+            <div class="chips" role="group" aria-label="選擇預算">
+              <button class="chip" type="button" data-group="budget" data-value="all" aria-pressed="true">不限</button>
+              <button class="chip" type="button" data-group="budget" data-value="low" aria-pressed="false">$100 內</button>
+              <button class="chip" type="button" data-group="budget" data-value="mid" aria-pressed="false">$100–200</button>
+              <button class="chip" type="button" data-group="budget" data-value="high" aria-pressed="false">$200–350</button>
+              <button class="chip" type="button" data-group="budget" data-value="treat" aria-pressed="false">$350 以上</button>
+            </div>
+          </div>
+          <div class="field"><div class="field-title">🥢 想吃哪一類？</div>
+            <div class="chips" role="group" aria-label="選擇餐點類型">
+              <button class="chip" type="button" data-group="type" data-value="all" aria-pressed="true">都可以</button>
+              <button class="chip" type="button" data-group="type" data-value="rice" aria-pressed="false">🍚 飯類</button>
+              <button class="chip" type="button" data-group="type" data-value="noodle" aria-pressed="false">🍜 麵類</button>
+              <button class="chip" type="button" data-group="type" data-value="light" aria-pressed="false">🥗 輕食</button>
+              <button class="chip" type="button" data-group="type" data-value="world" aria-pressed="false">🌎 異國</button>
+              <button class="chip" type="button" data-group="type" data-value="snack" aria-pressed="false">🍡 小吃</button>
+            </div>
+          </div>
+
+          <div class="field"><div class="field-title">💭 今天的心情如何？ <small>改變推薦偏好</small></div>
+            <div class="chips" role="group" aria-label="選擇今天的心情">
+              <button class="chip" type="button" data-group="mood" data-value="any" aria-pressed="true">🎲 都可以</button>
+              <button class="chip" type="button" data-group="mood" data-value="tired" aria-pressed="false">😴 有點累</button>
+              <button class="chip" type="button" data-group="mood" data-value="stressed" aria-pressed="false">😵 壓力大</button>
+              <button class="chip" type="button" data-group="mood" data-value="happy" aria-pressed="false">😊 很開心</button>
+              <button class="chip" type="button" data-group="mood" data-value="sad" aria-pressed="false">🥺 心情低落</button>
+              <button class="chip" type="button" data-group="mood" data-value="energetic" aria-pressed="false">✨ 想吃點特別的</button>
+            </div>
+            <p class="mood-hint">心情和天氣會提高某些餐點的推薦機率，但餐別、預算、素食限制會優先遵守。</p>
+          </div>
+          <div class="diet-row"><div><div class="diet-label">🥬 只推薦素食</div><div class="diet-desc">避開含肉、魚類的餐點；請向店家確認配料</div></div><button id="vegetarianToggle" type="button" class="toggle" role="switch" aria-checked="false" aria-label="只推薦素食"></button></div>
+          <div class="filter-bottom"><span id="matchCount" class="match-count" aria-live="polite">正在計算餐點…</span><button id="resetBtn" class="reset-btn" type="button">清除條件 ↗</button></div>
+          <p class="filter-note">＊預算是餐點的概略價位，不代表即時店家菜單或實際價格。</p>
+        </section>
+        <div class="right-col">
+          <section class="result-shell" aria-labelledby="result-title">
+            <div class="result-top"><span id="result-title" class="micro">02 — YOUR NEXT MEAL</span><span class="star" aria-hidden="true">✳</span></div>
+            <div id="resultCard" class="result-card" aria-live="polite" aria-atomic="true">
+              <div id="resultEmoji" class="result-emoji" aria-hidden="true">🎲</div>
+              <span id="resultLabel" class="result-label">READY WHEN YOU ARE</span>
+              <h2 id="resultName" class="result-name">今天要吃什麼？</h2>
+              <p id="resultReason" class="result-reason">看看天氣、選一下心情，<br>讓我們幫你決定這一餐！</p>
+              <div id="resultTags" class="result-tags"></div>
+            </div>
+            <button id="pickBtn" class="primary-btn" type="button">✦ 幫我決定吃什麼！</button>
+            <div class="result-actions">
+              <button id="favBtn" class="sub-btn" type="button" disabled>♡ 收藏這一餐</button>
+              <button id="shareBtn" class="sub-btn" type="button" disabled>↗ 分享結果</button>
+            </div>
+            <p id="actionStatus" class="status" aria-live="polite"></p>
+          </section>
+          <section class="mini-card" aria-labelledby="historyTitle"><div class="mini-head"><h3 id="historyTitle">↺ 最近抽到的餐點</h3><span class="mini-caption">顯示最近 5 筆</span></div><div id="historyList" class="pill-list"><p class="empty-copy">還沒抽選，快來決定第一餐！</p></div></section>
+          <section class="mini-card" aria-labelledby="favoritesTitle"><div class="mini-head"><h3 id="favoritesTitle">♡ 我的口袋名單</h3><span class="mini-caption">儲存於這台裝置</span></div><div id="favoritesList"><p class="empty-copy">遇到喜歡的餐點，可以按「收藏這一餐」。</p></div></section>
+        </div>
+      </div>
+      <div class="helper"><span aria-hidden="true" style="font-size:24px">💡</span><div><strong>小提醒：</strong>這個工具會參考天氣與心情提高適合餐點的抽選機率，不是醫療或營養建議，也不是推薦有空位的實際餐廳。若在意過敏原、食材、是否全素，請在點餐前向店家確認。</div></div>
+    </main>
+    <footer><span>© 2026 DAILY LITTLE TOOLS · Made for everyday indecision.</span><a href="index.html">回到個人首頁 ↗</a></footer>
+  </div>
+  <script>
+  'use strict';
+  // 可以在這裡自行新增菜色：id 不可重複；meal 支援 breakfast/lunch/dinner/late。
+  const meals = [
+    {id:'eggroll',name:'蛋餅配豆漿',emoji:'🥚',min:45,max:95,meal:['breakfast'],type:'snack',veg:true,reason:'經典早餐組合，簡單又有幸福感。'},
+    {id:'riceball',name:'古早味飯糰',emoji:'🍙',min:40,max:85,meal:['breakfast'],type:'rice',veg:false,reason:'拿著就能吃，忙碌早晨的好朋友。'},
+    {id:'toast',name:'起司蛋吐司',emoji:'🥪',min:45,max:90,meal:['breakfast'],type:'light',veg:true,reason:'熱熱的吐司配上起司，早晨很適合。'},
+    {id:'porridge',name:'蔬菜粥',emoji:'🥣',min:75,max:115,meal:['breakfast','late'],type:'rice',veg:true,reason:'想吃點暖胃的，來一碗剛剛好。'},
+    {id:'pancakes',name:'鬆餅早午餐',emoji:'🥞',min:180,max:310,meal:['breakfast','lunch'],type:'world',veg:true,reason:'給自己一個慢慢享受早餐的理由。'},
+    {id:'scallion',name:'蔥抓餅加蛋',emoji:'🫓',min:45,max:90,meal:['breakfast','late'],type:'snack',veg:true,reason:'外酥內軟，香噴噴又有飽足感。'},
+    {id:'mushroomtoast',name:'蘑菇厚片吐司',emoji:'🍞',min:50,max:95,meal:['breakfast'],type:'light',veg:true,reason:'香香的厚片很適合輕鬆開啟一天。'},
+    {id:'sandwich',name:'蔬菜三明治',emoji:'🥪',min:70,max:130,meal:['breakfast','lunch'],type:'light',veg:true,reason:'今天想吃清爽一點，就選它。'},
+    {id:'bento',name:'香煎雞腿便當',emoji:'🍱',min:110,max:170,meal:['lunch','dinner'],type:'rice',veg:false,reason:'有主菜、有飯、有配菜，滿足又方便。'},
+    {id:'braisedrice',name:'滷肉飯配青菜',emoji:'🍚',min:75,max:135,meal:['lunch','dinner','late'],type:'rice',veg:false,reason:'想不到吃什麼時，台式經典永不出錯。'},
+    {id:'beefnoodle',name:'紅燒牛肉麵',emoji:'🍜',min:160,max:260,meal:['lunch','dinner'],type:'noodle',veg:false,reason:'湯頭香濃，想吃一碗熱的就是它。'},
+    {id:'drynoodle',name:'麻醬乾麵',emoji:'🍝',min:75,max:140,meal:['lunch','dinner','late'],type:'noodle',veg:true,reason:'香濃麻醬拌上麵條，簡單卻很療癒。'},
+    {id:'dumplings',name:'高麗菜水餃',emoji:'🥟',min:85,max:160,meal:['lunch','dinner','late'],type:'snack',veg:false,reason:'一顆接著一顆，吃完剛剛好。'},
+    {id:'veg_dumplings',name:'素食水餃',emoji:'🥟',min:90,max:170,meal:['lunch','dinner'],type:'snack',veg:true,reason:'蔬菜餡鮮甜，吃起來也很有滿足感。'},
+    {id:'hotpotnoodle',name:'鍋燒意麵',emoji:'🍲',min:100,max:170,meal:['lunch','dinner','late'],type:'noodle',veg:false,reason:'有麵有湯有配料，舒服又飽足。'},
+    {id:'curry',name:'日式咖哩飯',emoji:'🍛',min:140,max:230,meal:['lunch','dinner'],type:'rice',veg:false,reason:'香濃咖哩配白飯，總是很讓人安心。'},
+    {id:'vegcurry',name:'蔬菜咖哩飯',emoji:'🍛',min:150,max:240,meal:['lunch','dinner'],type:'rice',veg:true,reason:'色彩繽紛的蔬菜搭咖哩，美味又溫暖。'},
+    {id:'ramen',name:'日式豚骨拉麵',emoji:'🍜',min:210,max:340,meal:['lunch','dinner'],type:'noodle',veg:false,reason:'濃郁的湯與彈牙的麵，今天犒賞一下自己。'},
+    {id:'bibimbap',name:'韓式石鍋拌飯',emoji:'🍚',min:180,max:300,meal:['lunch','dinner'],type:'world',veg:false,reason:'拌開熱熱的飯和配菜，口味豐富。'},
+    {id:'tofusoup',name:'韓式嫩豆腐鍋',emoji:'🍲',min:210,max:330,meal:['lunch','dinner'],type:'world',veg:false,reason:'想吃熱呼呼的料理，就來一鍋。'},
+    {id:'pho',name:'越南牛肉河粉',emoji:'🍜',min:170,max:270,meal:['lunch','dinner'],type:'noodle',veg:false,reason:'湯頭清爽又香氣十足，換換口味吧。'},
+    {id:'pastatomato',name:'番茄義大利麵',emoji:'🍝',min:170,max:290,meal:['lunch','dinner'],type:'world',veg:true,reason:'酸甜的番茄香氣，今天來點異國感。'},
+    {id:'creamypasta',name:'奶油培根義大利麵',emoji:'🍝',min:190,max:320,meal:['lunch','dinner'],type:'world',veg:false,reason:'奶香濃郁，適合想大口享受的一餐。'},
+    {id:'pizza',name:'瑪格麗特披薩',emoji:'🍕',min:230,max:350,meal:['lunch','dinner'],type:'world',veg:true,reason:'起司和番茄的經典搭配，心情也會變好。'},
+    {id:'burgers',name:'牛肉起司漢堡',emoji:'🍔',min:170,max:330,meal:['lunch','dinner'],type:'world',veg:false,reason:'大口咬下去，讓今天充滿滿足感。'},
+    {id:'salad',name:'彩虹蔬菜沙拉',emoji:'🥗',min:135,max:235,meal:['lunch','dinner'],type:'light',veg:true,reason:'吃得清爽又有層次，剛好想來點蔬菜。'},
+    {id:'grainbowl',name:'藜麥蔬食碗',emoji:'🥗',min:170,max:285,meal:['lunch','dinner'],type:'light',veg:true,reason:'清爽又有飽足感，給今天一點好能量。'},
+    {id:'onigiri',name:'鮭魚飯糰',emoji:'🍙',min:65,max:110,meal:['breakfast','lunch','late'],type:'rice',veg:false,reason:'想吃得快速方便，飯糰就是好選擇。'},
+    {id:'sushi',name:'綜合握壽司',emoji:'🍣',min:260,max:480,meal:['lunch','dinner'],type:'world',veg:false,reason:'今天適合來一點有儀式感的美味。'},
+    {id:'hotpot',name:'個人小火鍋',emoji:'🍲',min:220,max:330,meal:['lunch','dinner'],type:'world',veg:false,reason:'一個人吃鍋也很幸福，想放什麼都可以。'},
+    {id:'bigpot',name:'麻辣火鍋',emoji:'🌶️',min:400,max:700,meal:['dinner'],type:'world',veg:false,reason:'想好好犒賞自己，今天吃點熱鬧的。'},
+    {id:'steak',name:'牛排套餐',emoji:'🥩',min:380,max:650,meal:['lunch','dinner'],type:'world',veg:false,reason:'有時候就是值得好好吃一頓。'},
+    {id:'teppan',name:'鐵板燒套餐',emoji:'🍳',min:240,max:360,meal:['lunch','dinner'],type:'rice',veg:false,reason:'熱騰騰的鐵板香氣，今天就吃飽飽。'},
+    {id:'vegbento',name:'蔬食便當',emoji:'🍱',min:100,max:175,meal:['lunch','dinner'],type:'rice',veg:true,reason:'多種蔬菜與配菜，一餐吃得很豐富。'},
+    {id:'mushroomrisotto',name:'野菇燉飯',emoji:'🍚',min:200,max:330,meal:['lunch','dinner'],type:'world',veg:true,reason:'柔滑濃郁的燉飯，溫柔安撫你的胃。'},
+    {id:'friedrice',name:'蛋炒飯',emoji:'🍳',min:80,max:145,meal:['lunch','dinner','late'],type:'rice',veg:true,reason:'粒粒分明的炒飯，熟悉又香噴噴。'},
+    {id:'riceplates',name:'打拋豬飯',emoji:'🍛',min:155,max:245,meal:['lunch','dinner'],type:'world',veg:false,reason:'香氣濃郁帶點刺激，今天換個口味。'},
+    {id:'laksa',name:'南洋叻沙麵',emoji:'🍜',min:200,max:335,meal:['lunch','dinner'],type:'noodle',veg:false,reason:'香料和椰奶一起出場，吃點不一樣的。'},
+    {id:'lumi',name:'關東煮',emoji:'🍢',min:75,max:175,meal:['dinner','late'],type:'snack',veg:false,reason:'想吃點熱食又不想太負擔，就選它。'},
+    {id:'lo_mei',name:'自選滷味',emoji:'🍢',min:95,max:205,meal:['dinner','late'],type:'snack',veg:false,reason:'挑自己喜歡的配料，永遠都有新組合。'},
+    {id:'frieschicken',name:'鹽酥雞拼盤',emoji:'🍗',min:110,max:235,meal:['dinner','late'],type:'snack',veg:false,reason:'嘴饞的晚上就吃這個，但記得搭點蔬菜。'},
+    {id:'oyster',name:'蚵仔煎',emoji:'🍳',min:90,max:150,meal:['dinner','late'],type:'snack',veg:false,reason:'台灣夜市味，一想起來就很想吃。'},
+    {id:'radish',name:'蘿蔔糕',emoji:'🍽️',min:45,max:90,meal:['breakfast','late'],type:'snack',veg:true,reason:'外皮煎得金黃，簡單的小確幸。'},
+    {id:'miso',name:'味噌烏龍麵',emoji:'🍜',min:125,max:195,meal:['lunch','dinner','late'],type:'noodle',veg:true,reason:'滑順麵條配暖湯，日常感剛剛好。'},
+    {id:'vegbao',name:'香菇素包',emoji:'🥟',min:40,max:85,meal:['breakfast','late'],type:'snack',veg:true,reason:'軟綿綿的包子，輕鬆又暖胃。'},
+    {id:'sandv',name:'酪梨蛋三明治',emoji:'🥑',min:120,max:195,meal:['breakfast','lunch'],type:'light',veg:true,reason:'奶香酪梨加雞蛋，今天就走清爽路線。'},
+    {id:'tacos',name:'墨西哥雞肉捲',emoji:'🌯',min:160,max:280,meal:['lunch','dinner'],type:'world',veg:false,reason:'手拿就能吃，來點有趣的異國風味。'},
+    {id:'fishbento',name:'烤鯖魚定食',emoji:'🐟',min:220,max:345,meal:['lunch','dinner'],type:'rice',veg:false,reason:'配上熱飯與配菜，吃一頓舒服的定食。'},
+    {id:'congee',name:'吻仔魚粥',emoji:'🥣',min:120,max:195,meal:['lunch','dinner','late'],type:'rice',veg:false,reason:'溫潤的粥，適合今天想吃簡單一點。'},
+    {id:'pumpkin',name:'南瓜濃湯與麵包',emoji:'🥣',min:115,max:185,meal:['breakfast','lunch','dinner'],type:'light',veg:true,reason:'暖暖的濃湯配麵包，輕柔地填飽肚子。'},
+    {id:'toastpizza',name:'起司披薩吐司',emoji:'🍕',min:65,max:95,meal:['breakfast','late'],type:'world',veg:true,reason:'簡單的起司番茄組合，也有小小儀式感。'}
+  ];
+  const typeNames={rice:'飯類',noodle:'麵類',light:'輕食',world:'異國料理',snack:'小吃'};
+  const mealNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',late:'宵夜'};
+  const state={meal:'all',budget:'all',type:'all',mood:'any',vegetarian:false};
+  const $=id=>document.getElementById(id);
+  // 不同餐點的用餐感受標籤；用於加權推薦，並非熱量、營養或健康評分。
+  const tagGroups={
+    soup:['porridge','beefnoodle','hotpotnoodle','ramen','tofusoup','pho','hotpot','bigpot','laksa','lumi','miso','congee','pumpkin'],
+    warm:['eggroll','toast','porridge','scallion','bento','braisedrice','beefnoodle','drynoodle','dumplings','veg_dumplings','hotpotnoodle','curry','vegcurry','ramen','bibimbap','tofusoup','pho','pastatomato','creamypasta','hotpot','bigpot','teppan','vegbento','mushroomrisotto','friedrice','riceplates','laksa','lumi','lo_mei','miso','vegbao','congee','pumpkin'],
+    fresh:['sandwich','sandv','salad','grainbowl','sushi','onigiri','riceball','tacos','pancakes','pho','vegbao'],
+    light:['sandwich','sandv','salad','grainbowl','onigiri','riceball','pho','pumpkin','vegbento','sushi'],
+    comfort:['porridge','braisedrice','beefnoodle','drynoodle','dumplings','veg_dumplings','curry','vegcurry','ramen','tofusoup','hotpot','bigpot','miso','congee','pumpkin','mushroomrisotto','friedrice','toast','pancakes'],
+    quick:['eggroll','riceball','toast','scallion','mushroomtoast','sandwich','onigiri','dumplings','vegbao','sandv','radish'],
+    treat:['pancakes','ramen','bibimbap','creamypasta','pizza','burgers','sushi','hotpot','bigpot','steak','teppan','mushroomrisotto','laksa','tacos'],
+    bold:['bigpot','riceplates','laksa','frieschicken','lo_mei','creamypasta','burgers','bibimbap','pizza']
+  };
+  const tagsFor=food=>Object.keys(tagGroups).filter(tag=>tagGroups[tag].includes(food.id));
+  const cityLocations={
+    taipei:{name:'臺北市',lat:25.0330,lon:121.5654},newtaipei:{name:'新北市',lat:25.012,lon:121.465},
+    taoyuan:{name:'桃園市',lat:24.9936,lon:121.3010},hsinchu:{name:'新竹市',lat:24.8039,lon:120.9647},
+    taichung:{name:'臺中市',lat:24.1477,lon:120.6736},changhua:{name:'彰化縣',lat:24.073,lon:120.541},
+    chiayi:{name:'嘉義市',lat:23.480,lon:120.449},tainan:{name:'臺南市',lat:22.999,lon:120.227},
+    kaohsiung:{name:'高雄市',lat:22.6273,lon:120.3014},yilan:{name:'宜蘭縣',lat:24.750,lon:121.750},
+    hualien:{name:'花蓮縣',lat:23.990,lon:121.610},taitung:{name:'臺東縣',lat:22.750,lon:121.150}
+  };
+  let weatherContext=null;
+  let weatherRequestId=0;
+  let weatherController=null;
+  let manualCondition='sunny';
+  function codeToConditions(code,precip){
+    if((Number(precip)||0)>0.15 || (code>=51&&code<=99))return 'rainy';
+    if(code>=0&&code<=1)return 'sunny';
+    return 'cloudy';
+  }
+  const weatherDescriptions={sunny:{icon:'☀️',label:'晴朗'},cloudy:{icon:'☁️',label:'多雲或陰天'},rainy:{icon:'🌧️',label:'有雨'}};
+  function showWeather(){
+    const w=weatherContext;
+    if(!w){$('weatherIcon').textContent='🌥️';$('weatherTitle').textContent='天氣尚未取得';$('weatherDetail').textContent='可以重新查詢，或手動設定天氣與溫度。';return;}
+    const desc=weatherDescriptions[w.condition];
+    $('weatherIcon').textContent=desc.icon;
+    $('weatherTitle').textContent=`${w.temp.toFixed(0)}°C · ${desc.label}`;
+    const range=w.low!=null&&w.high!=null?`｜今日約 ${Math.round(w.low)}–${Math.round(w.high)}°C`:'';
+    $('weatherDetail').textContent=`${w.city} · ${w.source==='manual'?'手動設定':'目前氣象模式估計'}${range}`;
+    $('weatherStatus').textContent=w.source==='manual'?'✓ 使用手動天氣':`✓ ${w.city} 天氣已更新`;
+  }
+  function weatherChanged(){clearResult();showWeather();updateCount();}
+  async function fetchWeather(location){
+    const serial=++weatherRequestId;
+    if(weatherController)weatherController.abort();
+    weatherController=new AbortController();
+    const controller=weatherController;
+    const timeout=setTimeout(()=>controller.abort(),12000);
+    $('refreshWeatherBtn').disabled=true;
+    $('weatherStatus').textContent=`正在取得${location.name}天氣…`;
+    try{
+      const params=new URLSearchParams({latitude:String(location.lat),longitude:String(location.lon),current:'temperature_2m,weather_code,precipitation',daily:'temperature_2m_max,temperature_2m_min',timezone:'auto',forecast_days:'1'});
+      const res=await fetch('https://api.open-meteo.com/v1/forecast?'+params.toString(),{signal:controller.signal});
+      if(!res.ok)throw Error('weather HTTP '+res.status);
+      const json=await res.json();
+      if(!json.current||!Number.isFinite(Number(json.current.temperature_2m)))throw Error('氣溫資料不完整');
+      if(serial!==weatherRequestId)return;
+      const current=json.current;
+      weatherContext={temp:Number(current.temperature_2m),condition:codeToConditions(Number(current.weather_code),current.precipitation),city:location.name,source:'live',low:Number.isFinite(json.daily?.temperature_2m_min?.[0])?json.daily.temperature_2m_min[0]:null,high:Number.isFinite(json.daily?.temperature_2m_max?.[0])?json.daily.temperature_2m_max[0]:null};
+      weatherChanged();
+    }catch(error){
+      if(serial!==weatherRequestId)return;
+      console.warn('天氣讀取失敗（可改為手動設定）',error);
+      weatherContext=null;
+      weatherChanged();
+      $('weatherStatus').textContent='天氣連線失敗 · 可手動設定';
+    }finally{clearTimeout(timeout);if(serial===weatherRequestId){$('refreshWeatherBtn').disabled=false;}}
+  }
+  function loadSelectedCity(){const city=cityLocations[$('citySelect').value];if(city)fetchWeather(city);}
+  $('citySelect').addEventListener('change',loadSelectedCity);
+  $('refreshWeatherBtn').addEventListener('click',loadSelectedCity);
+  $('geoWeatherBtn').addEventListener('click',()=>{
+    if(!navigator.geolocation || !window.isSecureContext){$('weatherStatus').textContent='此瀏覽器無法定位，請選地區或手動設定';return;}
+    $('weatherStatus').textContent='正在詢問位置授權…';
+    navigator.geolocation.getCurrentPosition(
+      pos=>{const lat=pos.coords.latitude,lon=pos.coords.longitude;if(!Number.isFinite(lat)||!Number.isFinite(lon))return;$('citySelect').selectedIndex=-1;fetchWeather({name:'我的位置附近',lat,lon});},
+      ()=>{$('weatherStatus').textContent='無法取得位置，可改選地區或手動設定';},
+      {enableHighAccuracy:false,timeout:10000,maximumAge:600000}
+    );
+  });
+  $('manualWeatherBtn').addEventListener('click',()=>{
+    const panel=$('manualWeatherPanel');panel.hidden=!panel.hidden;$('manualWeatherBtn').setAttribute('aria-expanded',String(!panel.hidden));
+    if(!panel.hidden){$('manualTemperature').value=String(Math.min(40,Math.max(5,Math.round(weatherContext?.temp??25))));$('manualTempValue').textContent=$('manualTemperature').value+'°C';}
+  });
+  for(const button of document.querySelectorAll('.weather-choice'))button.addEventListener('click',()=>{manualCondition=button.dataset.weather;for(const choice of document.querySelectorAll('.weather-choice'))choice.setAttribute('aria-pressed',String(choice===button));});
+  $('manualTemperature').addEventListener('input',()=>{$('manualTempValue').textContent=$('manualTemperature').value+'°C'});
+  $('applyWeatherBtn').addEventListener('click',()=>{
+    ++weatherRequestId;if(weatherController)weatherController.abort();$('refreshWeatherBtn').disabled=false;
+    weatherContext={temp:Number($('manualTemperature').value),condition:manualCondition,city:'手動情境',source:'manual',low:null,high:null};
+    weatherChanged();
+    $('manualWeatherPanel').hidden=true;$('manualWeatherBtn').setAttribute('aria-expanded','false');
+  });
+  function weightedRecommendation(food){
+    const tags=new Set(tagsFor(food));let points=1;
+    const w=weatherContext;
+    if(w){
+      if(w.temp>=29){if(tags.has('fresh'))points+=5;if(tags.has('light'))points+=3;if(tags.has('soup'))points-=1.8;}
+      else if(w.temp<=19){if(tags.has('warm'))points+=3;if(tags.has('soup'))points+=5;if(tags.has('comfort'))points+=2;}
+      if(w.condition==='rainy'){if(tags.has('soup'))points+=5;if(tags.has('warm'))points+=2;if(tags.has('comfort'))points+=2;}
+      else if(w.condition==='sunny'&&w.temp>=25){if(tags.has('fresh'))points+=3;}
+    }
+    switch(state.mood){
+      case 'tired':if(tags.has('quick'))points+=5;if(tags.has('comfort'))points+=3;break;
+      case 'stressed':if(tags.has('comfort'))points+=6;if(tags.has('warm'))points+=1;break;
+      case 'happy':if(tags.has('treat'))points+=5;if(tags.has('bold'))points+=2;break;
+      case 'sad':if(tags.has('comfort'))points+=6;if(tags.has('soup'))points+=2;break;
+      case 'energetic':if(tags.has('treat'))points+=4;if(tags.has('bold'))points+=5;break;
+    }
+    return Math.max(.3,points);
+  }
+  function recommendationReason(food){
+    const w=weatherContext;const tags=new Set(tagsFor(food));const reasons=[];
+    if(w){
+      if(w.condition==='rainy'&&(tags.has('soup')||tags.has('warm')))reasons.push('雨天來份熱呼呼的料理很對味');
+      else if(w.temp<=19&&(tags.has('soup')||tags.has('warm')))reasons.push(`${Math.round(w.temp)}°C 的微涼天氣，適合吃點暖暖的`);
+      else if(w.temp>=29&&(tags.has('fresh')||tags.has('light')))reasons.push(`${Math.round(w.temp)}°C 的熱天氣，清爽一點更合胃口`);
+      else if(w.condition==='sunny'&&tags.has('fresh'))reasons.push('晴朗的日子，很適合來點清爽口味');
+    }
+    const moodReason={
+      tired:tags.has('quick')?'今天有點累，就選輕鬆方便的餐點':tags.has('comfort')?'累了一天，熟悉的味道很療癒':null,
+      stressed:tags.has('comfort')?'壓力大時，來點讓人安心的熟悉美味':null,
+      happy:tags.has('treat')?'好心情值得一餐小小的慶祝':null,
+      sad:tags.has('comfort')?'希望這份溫暖的美味替今天加一點好心情':null,
+      energetic:tags.has('bold')?'今天想換口味，試試香氣豐富的選擇':tags.has('treat')?'來點特別的犒賞自己吧':null
+    }[state.mood];
+    if(moodReason)reasons.push(moodReason);
+    return (reasons.length?reasons.join('，')+'。 ':'')+food.reason;
+  }
+  const STORAGE_KEY='whatToEatFavorites_v1';
+  const safeLoad=()=>{try{const result=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');return Array.isArray(result)?result.filter(id=>typeof id==='string'):[]}catch{return []}};
+  let favorites=safeLoad(),history=[],current=null;
+  const $chips=Array.from(document.querySelectorAll('.chip[data-group]'));
+  function matchesBudget(food){const m=(food.min+food.max)/2;switch(state.budget){case 'low':return food.max<=100;case 'mid':return m>=100&&m<=200;case 'high':return m>200&&m<=350;case 'treat':return m>350;default:return true}}
+  function candidates(){return meals.filter(food=>(state.meal==='all'||food.meal.includes(state.meal))&&(state.type==='all'||food.type===state.type)&&(!state.vegetarian||food.veg)&&matchesBudget(food));}
+  function updateCount(){const count=candidates().length;$('matchCount').textContent=`目前有 ${count} 道餐點符合條件`;$('pickBtn').disabled=count===0;if(!count){$('pickBtn').textContent='沒有符合的餐點';$('actionStatus').textContent='條件有點太嚴格了，試著放寬預算或餐別吧！'}else{$('pickBtn').textContent=current?'↻ 再抽一次！':'✦ 幫我決定吃什麼！';$('actionStatus').textContent=''}}
+  function renderResult(food){current=food;$('resultCard').classList.remove('bounce');void $('resultCard').offsetWidth;$('resultCard').classList.add('bounce');$('resultEmoji').textContent=food.emoji;$('resultLabel').textContent='TODAY’S PICK ✦';$('resultName').textContent=food.name;$('resultReason').textContent=recommendationReason(food);$('resultTags').replaceChildren();for(const label of [`約 NT$${food.min}–${food.max}`,typeNames[food.type],...(food.veg?['可選素食']:[])]){let tag=document.createElement('span');tag.textContent=label;$('resultTags').appendChild(tag)}$('favBtn').disabled=false;$('shareBtn').disabled=false;renderFavButton();}
+  function choose(){const pool=candidates();if(!pool.length)return;const recent=new Set(history.slice(0,3).map(x=>x.id));let options=pool.filter(food=>!recent.has(food.id));if(!options.length)options=pool;let total=options.reduce((sum,food)=>sum+weightedRecommendation(food),0);let ticket=Math.random()*total;let food=options[options.length-1];for(const option of options){ticket-=weightedRecommendation(option);if(ticket<0){food=option;break;}}history.unshift(food);history=history.slice(0,5);renderResult(food);renderHistory();updateCount();if(window.matchMedia('(max-width:850px)').matches){$('resultCard').scrollIntoView({behavior:'smooth',block:'center'});}}
+  function renderHistory(){const target=$('historyList');target.replaceChildren();if(!history.length){const p=document.createElement('p');p.className='empty-copy';p.textContent='還沒抽選，快來決定第一餐！';target.appendChild(p);return;}for(const food of history){const span=document.createElement('span');span.className='history-pill';span.textContent=food.emoji+' '+food.name;target.appendChild(span)}}
+  function saveFavorites(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(favorites))}catch{/* 隱私模式可能禁止儲存；本頁仍可正常使用 */}}
+  function renderFavButton(){const saved=current&&favorites.includes(current.id);$('favBtn').textContent=saved?'♥ 已收藏':'♡ 收藏這一餐';$('favBtn').classList.toggle('favorited',!!saved)}
+  function renderFavorites(){const box=$('favoritesList');box.replaceChildren();const selected=favorites.map(id=>meals.find(x=>x.id===id)).filter(Boolean);if(!selected.length){const p=document.createElement('p');p.className='empty-copy';p.textContent='遇到喜歡的餐點，可以按「收藏這一餐」。';box.appendChild(p);return;}for(const food of selected){const row=document.createElement('div');row.className='fav-row';const name=document.createElement('span');name.className='fav-name';name.textContent=food.emoji+' '+food.name;const remove=document.createElement('button');remove.className='fav-remove';remove.type='button';remove.textContent='移除';remove.setAttribute('aria-label','移除收藏：'+food.name);remove.addEventListener('click',()=>{favorites=favorites.filter(id=>id!==food.id);saveFavorites();renderFavorites();renderFavButton()});row.append(name,remove);box.appendChild(row)}}
+  function clearResult(){current=null;$('resultCard').classList.remove('bounce');$('resultEmoji').textContent='🎲';$('resultLabel').textContent='READY WHEN YOU ARE';$('resultName').textContent='今天要吃什麼？';$('resultReason').textContent='條件已更新，按下按鈕再抽一次吧！';$('resultTags').replaceChildren();$('favBtn').disabled=true;$('shareBtn').disabled=true;renderFavButton()}
+  function select(group,value){if(state[group]!==value)clearResult();state[group]=value;for(const chip of $chips){if(chip.dataset.group===group)chip.setAttribute('aria-pressed',String(chip.dataset.value===value))}updateCount()}
+  for(const chip of $chips){chip.addEventListener('click',()=>select(chip.dataset.group,chip.dataset.value))}
+  $('vegetarianToggle').addEventListener('click',()=>{state.vegetarian=!state.vegetarian;clearResult();$('vegetarianToggle').setAttribute('aria-checked',String(state.vegetarian));updateCount()});
+  $('resetBtn').addEventListener('click',()=>{clearResult();select('meal','all');select('budget','all');select('type','all');select('mood','any');state.vegetarian=false;$('vegetarianToggle').setAttribute('aria-checked','false');updateCount()});
+  $('pickBtn').addEventListener('click',choose);
+  $('favBtn').addEventListener('click',()=>{if(!current)return;if(favorites.includes(current.id)){favorites=favorites.filter(id=>id!==current.id)}else{favorites.unshift(current.id)}saveFavorites();renderFavButton();renderFavorites();$('actionStatus').textContent=favorites.includes(current.id)?'已加入你的口袋名單！':'已從口袋名單移除。'});
+  async function copyText(text){if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text);return}const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.top='-2000px';document.body.appendChild(area);area.select();const ok=document.execCommand('copy');area.remove();if(!ok)throw new Error('無法複製')}
+  $('shareBtn').addEventListener('click',async()=>{if(!current)return;const url='https://ruby750.github.io/again-again/what-to-eat.html';const text=`今天吃什麼？我抽到「${current.name}」！\n${url}`;try{if(navigator.share){await navigator.share({title:'今天吃什麼？',text:`我抽到「${current.name}」！`,url});$('actionStatus').textContent='已開啟分享選單。'}else{await copyText(text);$('actionStatus').textContent='已複製結果，可以貼給朋友！'}}catch(error){if(error.name==='AbortError')return;$('actionStatus').textContent='分享未成功，請手動複製網址。'}});
+  updateCount();renderHistory();renderFavorites();loadSelectedCity();
+  </script>
+</body>
+</html>
